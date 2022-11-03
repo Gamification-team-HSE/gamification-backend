@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-
 	"gitlab.com/krespix/gamification-api/internal/config"
 	"gitlab.com/krespix/gamification-api/internal/core/app"
 	"gitlab.com/krespix/gamification-api/internal/core/drivers/psql"
@@ -24,8 +22,6 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 		return nil, err
 	}
 
-	fmt.Println(cfg.HTTP.Port)
-	fmt.Println(cfg.PSQL.DSN)
 	// Connect to the postgres DB
 	db, err := initDatabase(ctx, cfg, a)
 	if err != nil {
