@@ -1,1 +1,1 @@
-web: gamification-api
+web: bin/server
