@@ -31,7 +31,7 @@ func New(db DB) *Server {
 func (s *Server) AddRoutes(r *mux.Router) error {
 	r.HandleFunc("/health", s.healthCheck).Methods(http.MethodGet)
 
-	r = r.PathPrefix("/v1").Subrouter()
+	_ = r.PathPrefix("/v1").Subrouter()
 
 	return nil
 }
