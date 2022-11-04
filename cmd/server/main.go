@@ -9,8 +9,6 @@ import (
 	"gitlab.com/krespix/gamification-api/internal/core/logging"
 	httptransport "gitlab.com/krespix/gamification-api/internal/transport/http"
 	"go.uber.org/zap"
-	"log"
-	"os"
 )
 
 func main() {
@@ -23,12 +21,6 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		log.Fatal("$PORT must be set")
-	}
-	cfg.HTTP.Port = port
 
 	// Connect to the postgres DB
 	db, err := initDatabase(ctx, cfg, a)
