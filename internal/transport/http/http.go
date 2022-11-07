@@ -5,6 +5,9 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"gitlab.com/krespix/gamification-api/internal/metrics"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -29,7 +32,9 @@ func New(db DB) *Server {
 
 // AddRoutes will add the routes this server supports to the router.
 func (s *Server) AddRoutes(r *mux.Router) error {
-	r.HandleFunc("/health", s.healthCheck).Methods(http.MethodGet)
+	healthHandler := http.HandlerFunc(s.healthCheck)
+	r.Handle("/health", incrementIncomingRequestsMiddleware(healthHandler)).Methods(http.MethodGet)
+	r.Handle("/metrics", promhttp.Handler())
 
 	_ = r.PathPrefix("/v1").Subrouter()
 
@@ -64,4 +69,11 @@ func handleResponse(ctx context.Context, w http.ResponseWriter, data interface{}
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func incrementIncomingRequestsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		metrics.IncomingHTTPRequestsTotal.With(prometheus.Labels{"method": r.Method}).Inc()
+		next.ServeHTTP(w, r)
+	})
 }
