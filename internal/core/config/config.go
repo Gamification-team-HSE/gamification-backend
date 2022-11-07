@@ -18,8 +18,9 @@ const (
 
 // AppConfig represents the configuration of our application.
 type AppConfig struct {
-	HTTP http.Config `yaml:"http"`
-	PSQL psql.Config `yaml:"psql"`
+	HTTP      http.Config `yaml:"http"`
+	PSQL      psql.Config `yaml:"psql"`
+	SentryDSN string      `yaml:"sentry_dsn"`
 }
 
 // Load loads the configuration from a yaml file on disk.
