@@ -58,19 +58,15 @@ func Load(ctx context.Context) (*Config, error) {
 }
 
 func loadFromFiles(ctx context.Context, cfg any) error {
-
 	if err := loadYaml(ctx, baseConfigPath, cfg); err != nil {
 		return err
 	}
-
 	p := fmt.Sprintf(envConfigPath, "")
-
 	if _, err := os.Stat(p); !errors.Is(err, os.ErrNotExist) {
 		if err := loadYaml(ctx, p, cfg); err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 

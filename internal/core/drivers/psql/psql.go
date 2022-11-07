@@ -17,7 +17,7 @@ const (
 
 // Config represents the configuration for our postgres database.
 type Config struct {
-	DSN string `yaml:"POSTGRES_DSN" validate:"required"`
+	DSN string `yaml:"dsn" validate:"required"`
 }
 
 // Driver provides an implementation for connecting to a postgres database.

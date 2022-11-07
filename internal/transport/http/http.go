@@ -42,7 +42,7 @@ func (s *Server) healthCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("app healthy"))
+	handleResponse(r.Context(), w, "healthy")
 }
 
 func handleResponse(ctx context.Context, w http.ResponseWriter, data interface{}) {

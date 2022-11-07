@@ -29,15 +29,15 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	}
 
 	//// Run our migrations which will update the DB or create it if it doesn't exist
-	//if err := db.MigratePostgres(ctx, "./migrations"); err != nil {
+	// if err := db.MigratePostgres(ctx, "./migrations"); err != nil {
 	//	return nil, err
-	//}
-	//a.OnShutdown(func() {
+	// }
+	// a.OnShutdown(func() {
 	//	// Temp for development so database is cleared on shutdown
 	//	if err := db.RevertMigrations(ctx, "./migrations"); err != nil {
 	//		logging.From(ctx).Error("failed to revert migrations", zap.Error(err))
 	//	}
-	//})
+	// })
 
 	httpServer := httptransport.New(db.GetDB())
 

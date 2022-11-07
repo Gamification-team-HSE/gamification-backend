@@ -1,5 +1,5 @@
 linters:
-  enable-all: true
+  enable-all: false
   disable:
     - lll
     - varnamelen
@@ -18,6 +18,10 @@ linters:
     - maligned
     - interfacer
     - scopelint
+    - gofumpt
+    - gci
+    - goimports
+    - structcheck
 issues:
   exclude:
     - "returns unexported type"
