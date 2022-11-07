@@ -2,4 +2,4 @@ http:
   port: "8080"
 
 psql:
-  POSTGRES_DSN: "postgres://ufvsmnae:vHeY5136T0Rn4lKT6tf1VHf1nEZEKVuZ@surus.db.elephantsql.com/ufvsmnae"
+  dsn: "postgres://ufvsmnae:vHeY5136T0Rn4lKT6tf1VHf1nEZEKVuZ@surus.db.elephantsql.com/ufvsmnae"
