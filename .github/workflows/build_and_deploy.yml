@@ -29,6 +29,7 @@ jobs:
 
   deploy:
     name: deploy
+    needs: [build]
     runs-on: ubuntu-18.04
     steps:
       - name: Deploy docker container webhook
