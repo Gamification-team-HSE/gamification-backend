@@ -3,3 +3,5 @@ http:
 
 psql:
   dsn: "postgres://ufvsmnae:vHeY5136T0Rn4lKT6tf1VHf1nEZEKVuZ@surus.db.elephantsql.com/ufvsmnae"
+
+sentry_dsn: "https://7ccdffeddedf43a798f350430fbb20f1@o4504101310562304.ingest.sentry.io/4504117921316864"

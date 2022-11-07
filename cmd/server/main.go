@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/getsentry/sentry-go"
 	"gitlab.com/krespix/gamification-api/internal/config"
 	"gitlab.com/krespix/gamification-api/internal/core/app"
 	"gitlab.com/krespix/gamification-api/internal/core/drivers/psql"
@@ -38,6 +39,15 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	//		logging.From(ctx).Error("failed to revert migrations", zap.Error(err))
 	//	}
 	// })
+
+	//init sentry
+	err = sentry.Init(sentry.ClientOptions{
+		Dsn:              cfg.SentryDSN,
+		TracesSampleRate: 1.0,
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	httpServer := httptransport.New(db.GetDB())
 
