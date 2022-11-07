@@ -9,5 +9,5 @@ var (
 	IncomingHTTPRequestsTotal = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "incoming_http_requests_total",
 		Help: "The total number of incoming http requests",
-	}, []string{"method", "from"})
+	}, []string{"uri", "method"})
 )
