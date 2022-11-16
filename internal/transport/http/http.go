@@ -34,7 +34,9 @@ func New(db DB) *Server {
 func (s *Server) AddRoutes(r *mux.Router) error {
 	healthHandler := http.HandlerFunc(s.healthCheck)
 	r.Handle("/health", incrementIncomingRequestsMiddleware(healthHandler)).Methods(http.MethodGet)
-	r.Handle("/metrics", promhttp.Handler())
+	r.Handle("/metrics", promhttp.HandlerFor(metrics.Registry, promhttp.HandlerOpts{
+		Registry: metrics.Registry,
+	}))
 
 	_ = r.PathPrefix("/v1").Subrouter()
 
