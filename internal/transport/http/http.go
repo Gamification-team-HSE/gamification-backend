@@ -5,12 +5,12 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"gitlab.com/krespix/gamification-api/internal/metrics"
+	"gitlab.com/krespix/gamification-api/internal/core/metrics"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 // DB represents a type that can be used to interact with the database.
@@ -31,14 +31,15 @@ func New(db DB) *Server {
 }
 
 // AddRoutes will add the routes this server supports to the router.
-func (s *Server) AddRoutes(r *mux.Router) error {
+func (s *Server) AddRoutes(r *chi.Mux) error {
 	healthHandler := http.HandlerFunc(s.healthCheck)
-	r.Handle("/health", incrementIncomingRequestsMiddleware(healthHandler)).Methods(http.MethodGet)
+
+	r.Use(middleware.Logger)
+
+	r.Handle("/health", incrementIncomingRequestsMiddleware(healthHandler))
 	r.Handle("/metrics", promhttp.HandlerFor(metrics.Registry, promhttp.HandlerOpts{
 		Registry: metrics.Registry,
 	}))
-
-	_ = r.PathPrefix("/v1").Subrouter()
 
 	return nil
 }

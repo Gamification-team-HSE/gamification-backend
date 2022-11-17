@@ -3,11 +3,11 @@ package http
 import (
 	"context"
 	"fmt"
+	"github.com/go-chi/chi/v5"
 	"net"
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"gitlab.com/krespix/gamification-api/internal/core/errors"
 	"gitlab.com/krespix/gamification-api/internal/core/logging"
 )
@@ -30,7 +30,7 @@ type Config struct {
 
 // Service represents a http service that provides routes for the listener.
 type Service interface {
-	AddRoutes(r *mux.Router) error
+	AddRoutes(r *chi.Mux) error
 }
 
 // Server represents a http server that listens on a port.
@@ -41,8 +41,7 @@ type Server struct {
 
 // New instantiates a new instance of Server.
 func New(s Service, cfg Config) (*Server, error) {
-	r := mux.NewRouter()
-	r.Use(requestLoggingMiddleware)
+	r := chi.NewRouter()
 
 	if err := s.AddRoutes(r); err != nil {
 		return nil, ErrAddRoutes.Wrap(err)
