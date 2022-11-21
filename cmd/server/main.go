@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/pressly/goose/v3"
 	httpAPI "gitlab.com/krespix/gamification-api/internal/api/http"
@@ -12,6 +13,7 @@ import (
 	"gitlab.com/krespix/gamification-api/internal/core/logging"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres"
 	"go.uber.org/zap"
+	"os"
 )
 
 const defaultConfigPath = "config/config.yaml"
@@ -80,7 +82,12 @@ func initDatabase(ctx context.Context, cfg *config.Config, a *app.App) (*postgre
 		return nil, err
 	}
 
-	if err := goose.Up(db.GetDB(), "./migrations"); err != nil {
+	currDir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(currDir)
+	if err := goose.Up(db.GetDB(), fmt.Sprintf("%s/migrations", currDir)); err != nil {
 		return nil, err
 	}
 
