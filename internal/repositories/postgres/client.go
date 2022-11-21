@@ -41,7 +41,6 @@ func New(cfg Config) (*Client, error) {
 
 // Connect connects to the database.
 func (c *Client) Connect(_ context.Context) error {
-	fmt.Println(c.createDSN())
 	db, err := sqlx.Connect("postgres", c.createDSN())
 	if err != nil {
 		return ErrConnect.Wrap(err)

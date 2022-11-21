@@ -86,7 +86,7 @@ func initDatabase(ctx context.Context, cfg *config.Config, a *app.App) (*postgre
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(currDir)
+
 	if err := goose.Up(db.GetDB(), fmt.Sprintf("%s/migrations", currDir)); err != nil {
 		return nil, err
 	}
