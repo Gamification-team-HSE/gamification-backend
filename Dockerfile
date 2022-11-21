@@ -1,5 +1,8 @@
 FROM golang:1.19-alpine
 
+ARG DB_PASSWORD
+ENV DB_PASSWORD $DB_PASSWORD
+
 # Set destination for COPY
 WORKDIR /app
 
@@ -8,7 +11,7 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
-COPY ./ ./
+COPY . .
 
 # Build
 RUN go build -o /cmd/server ./cmd/server/main.go

@@ -2,10 +2,10 @@ http:
   port: "8080"
 
 db:
-  host: "vartose.fvds.ru"
+  host: "localhost"
   port: "5432"
-  user: "gamification_api"
-  db_name: "gamification_api"
+  user: "postgres"
+  db_name: "postgres"
   ssl_mode: "disable"
 
 sentry:

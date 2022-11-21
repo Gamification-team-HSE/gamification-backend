@@ -2,54 +2,58 @@ package main
 
 import (
 	"context"
+	"flag"
 	"github.com/getsentry/sentry-go"
+	"github.com/pressly/goose/v3"
+	httpAPI "gitlab.com/krespix/gamification-api/internal/api/http"
 	"gitlab.com/krespix/gamification-api/internal/config"
 	"gitlab.com/krespix/gamification-api/internal/core/app"
-	"gitlab.com/krespix/gamification-api/internal/core/drivers/psql"
 	"gitlab.com/krespix/gamification-api/internal/core/listeners/http"
 	"gitlab.com/krespix/gamification-api/internal/core/logging"
-	httptransport "gitlab.com/krespix/gamification-api/internal/transport/http"
+	"gitlab.com/krespix/gamification-api/internal/repositories/postgres"
 	"go.uber.org/zap"
 )
+
+const defaultConfigPath = "config/config.yaml"
+
+var (
+	// configName - имя файла конфигурации.
+	configPath string
+)
+
+func init() {
+	flag.StringVar(&configPath, "config", defaultConfigPath, "Configuration file path")
+	flag.Parse()
+}
 
 func main() {
 	app.Start(appStart)
 }
 
 func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
-	// Load configuration from config/config.yaml which contains details such as DB connection params
-	cfg, err := config.Load(ctx)
+	cfg, err := config.Load(ctx, configPath)
 	if err != nil {
 		return nil, err
 	}
 
 	// Connect to the postgres DB
-	db, err := initDatabase(ctx, cfg, a)
+	_, err = initDatabase(ctx, cfg, a)
 	if err != nil {
 		return nil, err
 	}
-
-	//// Run our migrations which will update the DB or create it if it doesn't exist
-	// if err := db.MigratePostgres(ctx, "./migrations"); err != nil {
-	//	return nil, err
-	// }
-	// a.OnShutdown(func() {
-	//	// Temp for development so database is cleared on shutdown
-	//	if err := db.RevertMigrations(ctx, "./migrations"); err != nil {
-	//		logging.From(ctx).Error("failed to revert migrations", zap.Error(err))
-	//	}
-	// })
 
 	//init sentry
-	err = sentry.Init(sentry.ClientOptions{
-		Dsn:              cfg.SentryDSN,
-		TracesSampleRate: 1.0,
-	})
-	if err != nil {
-		return nil, err
+	if cfg.Sentry.Enabled {
+		err = sentry.Init(sentry.ClientOptions{
+			Dsn:              cfg.Sentry.DSN,
+			TracesSampleRate: 1.0,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	httpServer := httptransport.New(db.GetDB())
+	httpServer := httpAPI.New()
 
 	// Create an HTTP server
 	h, err := http.New(httpServer, cfg.HTTP)
@@ -63,10 +67,21 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	}, nil
 }
 
-func initDatabase(ctx context.Context, cfg *config.Config, a *app.App) (*psql.Driver, error) {
-	db := psql.New(cfg.PSQL)
+func initDatabase(ctx context.Context, cfg *config.Config, a *app.App) (*postgres.Client, error) {
+	db, err := postgres.New(cfg.DB)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := db.Connect(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := goose.SetDialect("postgres"); err != nil {
+		return nil, err
+	}
+
+	if err := goose.Up(db.GetDB(), "./migrations"); err != nil {
 		return nil, err
 	}
 

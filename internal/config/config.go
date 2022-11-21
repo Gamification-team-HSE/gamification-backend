@@ -2,7 +2,6 @@ package config
 
 import (
 	"context"
-	"fmt"
 	"github.com/caarlos0/env/v6"
 	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
@@ -15,8 +14,6 @@ import (
 )
 
 const (
-	// ErrInvalidEnvironment is returned when the SPEAKEASY_ENVIRONMENT environment variable is not set.
-	ErrInvalidEnvironment = errors.Error("SPEAKEASY_ENVIRONMENT is not set")
 	// ErrValidation is returned when the configuration is invalid.
 	ErrValidation = errors.Error("invalid configuration")
 	// ErrEnvVars is returned when the environment variables are invalid.
@@ -27,21 +24,16 @@ const (
 	ErrUnmarshal = errors.Error("failed to unmarshal file")
 )
 
-var (
-	baseConfigPath = "config/config.yaml"
-	envConfigPath  = "config/config-%s.yaml"
-)
-
 // Config represents the configuration of our application.
 type Config struct {
 	config.AppConfig `yaml:",inline"`
 }
 
 // Load loads the configuration from the config/config.yaml file.
-func Load(ctx context.Context) (*Config, error) {
+func Load(ctx context.Context, cfgPath string) (*Config, error) {
 	cfg := &Config{}
 
-	if err := loadFromFiles(ctx, cfg); err != nil {
+	if err := loadFromFiles(ctx, cfg, cfgPath); err != nil {
 		return nil, err
 	}
 
@@ -57,15 +49,9 @@ func Load(ctx context.Context) (*Config, error) {
 	return cfg, nil
 }
 
-func loadFromFiles(ctx context.Context, cfg any) error {
-	if err := loadYaml(ctx, baseConfigPath, cfg); err != nil {
+func loadFromFiles(ctx context.Context, cfg any, path string) error {
+	if err := loadYaml(ctx, path, cfg); err != nil {
 		return err
-	}
-	p := fmt.Sprintf(envConfigPath, "")
-	if _, err := os.Stat(p); !errors.Is(err, os.ErrNotExist) {
-		if err := loadYaml(ctx, p, cfg); err != nil {
-			return err
-		}
 	}
 	return nil
 }
