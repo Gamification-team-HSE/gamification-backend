@@ -27,7 +27,7 @@ func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 
 	baseRouter.Use(middleware.Logger)
 	baseRouter.Handle("/health", incrementIncomingRequestsMiddleware(healthHandler))
-	baseRouter.Handle("/", promhttp.HandlerFor(metrics.Registry, promhttp.HandlerOpts{
+	baseRouter.Handle("/metrics", promhttp.HandlerFor(metrics.Registry, promhttp.HandlerOpts{
 		Registry: metrics.Registry,
 	}))
 
