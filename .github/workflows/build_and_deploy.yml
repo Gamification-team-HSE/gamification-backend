@@ -26,8 +26,6 @@ jobs:
           context: .
           push: true
           tags: vokhlebalov/gamification:latest
-          secrets: |
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
 
   deploy:
     name: deploy
