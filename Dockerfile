@@ -1,6 +1,7 @@
 FROM golang:1.19-alpine
 
 ARG DB_PASSWORD
+
 ENV DB_PASSWORD $DB_PASSWORD
 
 # Set destination for COPY
