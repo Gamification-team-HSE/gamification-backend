@@ -41,7 +41,6 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	//init sentry
 	if cfg.Sentry.Enabled {
 		err = sentry.Init(sentry.ClientOptions{
