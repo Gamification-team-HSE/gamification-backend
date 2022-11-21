@@ -34,7 +34,7 @@ func Start(onStart OnStart) {
 	ctx := context.Background()
 
 	a := &App{
-		Name: "test-app", // TODO determine how to configure this
+		Name: "test-app",
 	}
 	a.OnShutdown(func() {
 		if err := logging.Sync(ctx); err != nil {

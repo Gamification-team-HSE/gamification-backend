@@ -5,39 +5,29 @@ package http
 import (
 	"context"
 	"encoding/json"
-	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gitlab.com/krespix/gamification-api/internal/core/metrics"
 	"net/http"
 )
 
-// DB represents a type that can be used to interact with the database.
-type DB interface {
-	PingContext(ctx context.Context) error
-}
-
 // Server represents an HTTP server that can handle requests for this microservice.
-type Server struct {
-	db DB
-}
+type Server struct{}
 
 // New will instantiate a new instance of Server.
-func New(db DB) *Server {
-	return &Server{
-		db: db,
-	}
+func New() *Server {
+	return &Server{}
 }
 
 // AddRoutes will add the routes this server supports to the router.
-func (s *Server) AddRoutes(r *chi.Mux) error {
+func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 	healthHandler := http.HandlerFunc(s.healthCheck)
 
-	r.Use(middleware.Logger)
-
-	r.Handle("/health", incrementIncomingRequestsMiddleware(healthHandler))
-	r.Handle("/metrics", promhttp.HandlerFor(metrics.Registry, promhttp.HandlerOpts{
+	baseRouter.Use(middleware.Logger)
+	baseRouter.Handle("/health", incrementIncomingRequestsMiddleware(healthHandler))
+	baseRouter.Handle("/", promhttp.HandlerFor(metrics.Registry, promhttp.HandlerOpts{
 		Registry: metrics.Registry,
 	}))
 
@@ -45,10 +35,6 @@ func (s *Server) AddRoutes(r *chi.Mux) error {
 }
 
 func (s *Server) healthCheck(w http.ResponseWriter, r *http.Request) {
-	if err := s.db.PingContext(r.Context()); err != nil {
-		handleError(r.Context(), w, err)
-		return
-	}
 	w.WriteHeader(http.StatusOK)
 	handleResponse(r.Context(), w, "healthy")
 }
