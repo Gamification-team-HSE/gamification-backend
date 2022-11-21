@@ -14,6 +14,8 @@ RUN go mod download
 
 COPY ./ ./
 
+COPY /migrations/*.sql /app/migrations
+
 # Build
 RUN go build -o /cmd/server ./cmd/server/main.go
 
