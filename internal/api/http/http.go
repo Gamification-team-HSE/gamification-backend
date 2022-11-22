@@ -41,6 +41,7 @@ func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 	})
 	srv := handler.NewDefaultServer(schema)
 
+	baseRouter.Use(enableCORS)
 	baseRouter.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"*"},
@@ -91,6 +92,16 @@ func handleResponse(ctx context.Context, w http.ResponseWriter, data interface{}
 func incrementIncomingRequestsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metrics.IncomingHTTPRequestsTotal.With(prometheus.Labels{"method": r.Method, "uri": r.RequestURI}).Inc()
+		next.ServeHTTP(w, r)
+	})
+}
+
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		next.ServeHTTP(w, r)
 	})
 }
