@@ -40,6 +40,7 @@ func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 	})
 	srv := handler.NewDefaultServer(schema)
 
+	baseRouter.Use(enableCors)
 	graphqlRouter := baseRouter.PathPrefix("/gapi/v1").Subrouter()
 	apiSubRouter := baseRouter.PathPrefix("/api").Subrouter()
 	v1SubRouter := apiSubRouter.PathPrefix("/v1").Subrouter()
@@ -49,7 +50,7 @@ func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 	graphqlRouter.Handle("/playground", pgHandler)
 
 	v1SubRouter.Use(incrementIncomingRequestsMiddleware)
-	v1SubRouter.Handle("/health", healthHandler)
+	v1SubRouter.Handle("/health", healthHandler).Methods(http.MethodGet)
 
 	return nil
 }
@@ -83,6 +84,13 @@ func handleResponse(ctx context.Context, w http.ResponseWriter, data interface{}
 func incrementIncomingRequestsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metrics.IncomingHTTPRequestsTotal.With(prometheus.Labels{"method": r.Method, "uri": r.RequestURI}).Inc()
+		next.ServeHTTP(w, r)
+	})
+}
+
+func enableCors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		next.ServeHTTP(w, r)
 	})
 }
