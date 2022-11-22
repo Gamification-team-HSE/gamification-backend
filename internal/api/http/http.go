@@ -1,24 +1,29 @@
-//go:generate mockgen -destination=./mocks/http_mock.go -package mocks github.com/speakeasy-api/rest-template-go/internal/transport/http Users,DB
-
 package http
 
 import (
 	"context"
 	"encoding/json"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gitlab.com/krespix/gamification-api/internal/core/metrics"
+	"gitlab.com/krespix/gamification-api/pkg/graphql/server"
 	"net/http"
 )
 
 // Server represents an HTTP server that can handle requests for this microservice.
-type Server struct{}
+type Server struct {
+	resolver server.ResolverRoot
+}
 
 // New will instantiate a new instance of Server.
-func New() *Server {
-	return &Server{}
+func New(resolver server.ResolverRoot) *Server {
+	return &Server{
+		resolver: resolver,
+	}
 }
 
 // AddRoutes will add the routes this server supports to the router.
@@ -26,10 +31,25 @@ func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 	healthHandler := http.HandlerFunc(s.healthCheck)
 
 	baseRouter.Use(middleware.Logger)
-	baseRouter.Handle("/health", incrementIncomingRequestsMiddleware(healthHandler))
 	baseRouter.Handle("/metrics", promhttp.HandlerFor(metrics.Registry, promhttp.HandlerOpts{
 		Registry: metrics.Registry,
 	}))
+
+	schema := server.NewExecutableSchema(server.Config{
+		Resolvers: s.resolver,
+	})
+	srv := handler.NewDefaultServer(schema)
+
+	graphqlRouter := baseRouter.PathPrefix("/gapi/v1").Subrouter()
+	apiSubRouter := baseRouter.PathPrefix("/api").Subrouter()
+	v1SubRouter := apiSubRouter.PathPrefix("/v1").Subrouter()
+
+	pgHandler := playground.Handler("gamification-api", "/gapi/v1/query")
+	graphqlRouter.Handle("/query", srv)
+	graphqlRouter.Handle("/playground", pgHandler)
+
+	v1SubRouter.Use(incrementIncomingRequestsMiddleware)
+	v1SubRouter.Handle("/health", healthHandler)
 
 	return nil
 }

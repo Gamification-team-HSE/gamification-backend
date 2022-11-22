@@ -1,5 +1,5 @@
 package user
 
-type Repository struct {
+type Repository interface {
 	//TODO
 }

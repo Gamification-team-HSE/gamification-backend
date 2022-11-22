@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/pressly/goose/v3"
+	"gitlab.com/krespix/gamification-api/internal/api/graphql/resolvers"
 	httpAPI "gitlab.com/krespix/gamification-api/internal/api/http"
 	"gitlab.com/krespix/gamification-api/internal/config"
 	"gitlab.com/krespix/gamification-api/internal/core/app"
@@ -54,7 +55,8 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 		}
 	}
 
-	httpServer := httpAPI.New()
+	resolver := resolvers.New()
+	httpServer := httpAPI.New(resolver)
 
 	// Create an HTTP server
 	h, err := http.New(httpServer, cfg.HTTP)

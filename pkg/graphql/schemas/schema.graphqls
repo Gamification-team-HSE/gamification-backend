@@ -1,0 +1,7 @@
+type Query {
+    GetUser(id: Int!): User!
+}
+
+type Mutation {
+    CreateUser(user: NewUser!): User!
+}

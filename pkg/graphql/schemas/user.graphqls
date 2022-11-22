@@ -1,0 +1,20 @@
+scalar Time
+
+type User {
+    id: Int!
+    foreign_id: Int!
+    email: String!
+    created_at: Time!
+    deleted_at: Time
+    role: Role!
+}
+
+enum Role {
+    admin
+    user
+}
+
+input NewUser {
+    foreign_id: Int
+    email: String!
+}
