@@ -13,6 +13,7 @@ require (
 	github.com/lib/pq v1.10.7
 	github.com/pressly/goose/v3 v3.7.0
 	github.com/prometheus/client_golang v1.13.1
+	github.com/rs/cors v1.8.2
 	github.com/vektah/gqlparser/v2 v2.5.1
 	go.uber.org/zap v1.23.0
 	gopkg.in/yaml.v3 v3.0.1

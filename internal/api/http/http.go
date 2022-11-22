@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/cors"
 	"gitlab.com/krespix/gamification-api/internal/core/metrics"
 	"gitlab.com/krespix/gamification-api/pkg/graphql/server"
 	"net/http"
@@ -40,7 +41,13 @@ func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 	})
 	srv := handler.NewDefaultServer(schema)
 
-	baseRouter.Use(enableCors)
+	baseRouter.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"*"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	}).Handler)
+
 	graphqlRouter := baseRouter.PathPrefix("/gapi/v1").Subrouter()
 	apiSubRouter := baseRouter.PathPrefix("/api").Subrouter()
 	v1SubRouter := apiSubRouter.PathPrefix("/v1").Subrouter()
@@ -84,14 +91,6 @@ func handleResponse(ctx context.Context, w http.ResponseWriter, data interface{}
 func incrementIncomingRequestsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metrics.IncomingHTTPRequestsTotal.With(prometheus.Labels{"method": r.Method, "uri": r.RequestURI}).Inc()
-		next.ServeHTTP(w, r)
-	})
-}
-
-func enableCors(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
 		next.ServeHTTP(w, r)
 	})
 }
