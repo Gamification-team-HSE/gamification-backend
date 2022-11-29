@@ -40,5 +40,11 @@ func (r *Resolver) CreateUser(ctx context.Context, user apiModels.NewUser) (inte
 			Valid:  true,
 		}
 	}
-	return nil, nil
+	err := r.userService.Create(ctx, mUser)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"status": "success",
+	}, nil
 }
