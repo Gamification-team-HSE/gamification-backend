@@ -5,16 +5,24 @@ import (
 	"flag"
 	"fmt"
 	"github.com/getsentry/sentry-go"
+	"github.com/go-playground/validator/v10"
 	"github.com/pressly/goose/v3"
 	"gitlab.com/krespix/gamification-api/internal/api/graphql/resolvers"
 	httpAPI "gitlab.com/krespix/gamification-api/internal/api/http"
+	"gitlab.com/krespix/gamification-api/internal/clients/smtp"
 	"gitlab.com/krespix/gamification-api/internal/config"
 	"gitlab.com/krespix/gamification-api/internal/core/app"
 	"gitlab.com/krespix/gamification-api/internal/core/listeners/http"
 	"gitlab.com/krespix/gamification-api/internal/core/logging"
+	"gitlab.com/krespix/gamification-api/internal/repositories/cache"
+	authRepository "gitlab.com/krespix/gamification-api/internal/repositories/cache/auth"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres"
+	userRepository "gitlab.com/krespix/gamification-api/internal/repositories/postgres/user"
+	authService "gitlab.com/krespix/gamification-api/internal/services/auth"
+	userService "gitlab.com/krespix/gamification-api/internal/services/user"
 	"go.uber.org/zap"
 	"os"
+	"time"
 )
 
 const defaultConfigPath = "config/config.yaml"
@@ -40,7 +48,7 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	}
 
 	// Connect to the postgres DB
-	_, err = initDatabase(ctx, cfg, a)
+	db, err := initDatabase(ctx, cfg, a)
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +63,28 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 		}
 	}
 
-	resolver := resolvers.New()
-	httpServer := httpAPI.New(resolver)
+	validate := validator.New()
+
+	//init clients
+	smtpClient := smtp.New(cfg.SMTP)
+	cacheClient := cache.New(time.Second*60, time.Second*70)
+
+	//init repositories
+	userRepo := userRepository.New(db)
+	authRepo := authRepository.New(cacheClient)
+
+	//init services
+	userSrc := userService.New(userRepo, validate)
+	authSrc := authService.New(smtpClient, userRepo, authRepo, validate, cfg.JWT.Secret, time.Hour*24)
+
+	resolver := resolvers.New(userSrc, authSrc)
+	httpServer := httpAPI.New(resolver, authSrc)
+
+	//init super admin
+	err = userSrc.InitSuperAdmin(ctx, cfg.SuperAdmin)
+	if err != nil {
+		return nil, err
+	}
 
 	// Create an HTTP server
 	h, err := http.New(httpServer, cfg.HTTP)

@@ -28,6 +28,9 @@ jobs:
           tags: vokhlebalov/gamification:latest
           build-args: |
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+            SUPER_ADMIN_EMAIL=${{ secrets.SUPER_ADMIN_EMAIL }}
 
   deploy:
     name: deploy

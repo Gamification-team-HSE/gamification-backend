@@ -2,19 +2,24 @@ scalar Time
 
 type User {
     id: Int!
-    foreign_id: Int!
+    foreign_id: String
     email: String!
     created_at: Time!
     deleted_at: Time
     role: Role!
+    avatar: String
+    name: String
 }
 
 enum Role {
     admin
     user
+    super_admin
 }
 
 input NewUser {
-    foreign_id: Int
+    foreign_id: String
     email: String!
+    Role: Role!
+    Name: String
 }

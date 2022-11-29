@@ -4,13 +4,16 @@ go 1.19
 
 require (
 	github.com/99designs/gqlgen v0.17.20
+	github.com/Masterminds/squirrel v1.5.3
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/getsentry/sentry-go v0.14.0
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-playground/validator/v10 v10.11.1
+	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gorilla/mux v1.7.4
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.7
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pressly/goose/v3 v3.7.0
 	github.com/prometheus/client_golang v1.13.1
 	github.com/rs/cors v1.8.2
@@ -28,6 +31,8 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
+	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
+	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-sqlite3 v1.14.10 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect

@@ -7,23 +7,27 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/mux"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
+	"gitlab.com/krespix/gamification-api/internal/api/graphql/directives"
+	"gitlab.com/krespix/gamification-api/internal/api/http/middlewares"
 	"gitlab.com/krespix/gamification-api/internal/core/metrics"
+	"gitlab.com/krespix/gamification-api/internal/services/auth"
 	"gitlab.com/krespix/gamification-api/pkg/graphql/server"
 	"net/http"
 )
 
 // Server represents an HTTP server that can handle requests for this microservice.
 type Server struct {
-	resolver server.ResolverRoot
+	resolver    server.ResolverRoot
+	authService auth.Service
 }
 
 // New will instantiate a new instance of Server.
-func New(resolver server.ResolverRoot) *Server {
+func New(resolver server.ResolverRoot, authSvc auth.Service) *Server {
 	return &Server{
-		resolver: resolver,
+		resolver:    resolver,
+		authService: authSvc,
 	}
 }
 
@@ -37,11 +41,12 @@ func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 	}))
 
 	schema := server.NewExecutableSchema(server.Config{
-		Resolvers: s.resolver,
+		Resolvers:  s.resolver,
+		Directives: server.DirectiveRoot{Auth: directives.Auth},
 	})
 	srv := handler.NewDefaultServer(schema)
 
-	baseRouter.Use(enableCORS)
+	baseRouter.Use(middlewares.EnableCORS)
 	baseRouter.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"*"},
@@ -49,15 +54,19 @@ func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 		AllowCredentials: true,
 	}).Handler)
 
+	authmw := middlewares.NewAuth(s.authService)
+
 	graphqlRouter := baseRouter.PathPrefix("/gapi/v1").Subrouter()
 	apiSubRouter := baseRouter.PathPrefix("/api").Subrouter()
 	v1SubRouter := apiSubRouter.PathPrefix("/v1").Subrouter()
+
+	graphqlRouter.Use(authmw.AuthMiddleware)
 
 	pgHandler := playground.Handler("gamification-api", "/gapi/v1/query")
 	graphqlRouter.Handle("/query", srv)
 	graphqlRouter.Handle("/playground", pgHandler)
 
-	v1SubRouter.Use(incrementIncomingRequestsMiddleware)
+	v1SubRouter.Use(middlewares.IncrementIncomingRequestsMiddleware)
 	v1SubRouter.Handle("/health", healthHandler).Methods(http.MethodGet)
 
 	return nil
@@ -87,20 +96,4 @@ func handleResponse(ctx context.Context, w http.ResponseWriter, data interface{}
 	}
 
 	w.WriteHeader(http.StatusOK)
-}
-
-func incrementIncomingRequestsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		metrics.IncomingHTTPRequestsTotal.With(prometheus.Labels{"method": r.Method, "uri": r.RequestURI}).Inc()
-		next.ServeHTTP(w, r)
-	})
-}
-
-func enableCORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		next.ServeHTTP(w, r)
-	})
 }

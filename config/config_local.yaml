@@ -11,3 +11,11 @@ db:
 sentry:
   dsn: "https://7ccdffeddedf43a798f350430fbb20f1@o4504101310562304.ingest.sentry.io/4504117921316864"
   enable: true
+
+super_admin:
+  name: "Федор Хлебалов"
+
+smtp:
+  host: "smtp.mail.ru"
+  port: "587"
+  email: "gamification-noreply@mail.ru"

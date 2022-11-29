@@ -11,8 +11,18 @@ import (
 	"gitlab.com/krespix/gamification-api/pkg/graphql/server"
 )
 
+// SendCode is the resolver for the SendCode field.
+func (r *mutationResolver) SendCode(ctx context.Context, email string) (interface{}, error) {
+	panic(fmt.Errorf("not implemented: SendCode - SendCode"))
+}
+
+// VerifyCode is the resolver for the VerifyCode field.
+func (r *mutationResolver) VerifyCode(ctx context.Context, email string, code int) (string, error) {
+	panic(fmt.Errorf("not implemented: VerifyCode - VerifyCode"))
+}
+
 // CreateUser is the resolver for the CreateUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, user models.NewUser) (*models.User, error) {
+func (r *mutationResolver) CreateUser(ctx context.Context, user models.NewUser) (interface{}, error) {
 	panic(fmt.Errorf("not implemented: CreateUser - CreateUser"))
 }
 

@@ -10,34 +10,40 @@ import (
 )
 
 type NewUser struct {
-	ForeignID *int   `json:"foreign_id"`
-	Email     string `json:"email"`
+	ForeignID *string `json:"foreign_id"`
+	Email     string  `json:"email"`
+	Role      Role    `json:"Role"`
+	Name      *string `json:"Name"`
 }
 
 type User struct {
 	ID        int        `json:"id"`
-	ForeignID int        `json:"foreign_id"`
+	ForeignID *string    `json:"foreign_id"`
 	Email     string     `json:"email"`
 	CreatedAt time.Time  `json:"created_at"`
 	DeletedAt *time.Time `json:"deleted_at"`
 	Role      Role       `json:"role"`
+	Avatar    *string    `json:"avatar"`
+	Name      *string    `json:"name"`
 }
 
 type Role string
 
 const (
-	RoleAdmin Role = "admin"
-	RoleUser  Role = "user"
+	RoleAdmin      Role = "admin"
+	RoleUser       Role = "user"
+	RoleSuperAdmin Role = "super_admin"
 )
 
 var AllRole = []Role{
 	RoleAdmin,
 	RoleUser,
+	RoleSuperAdmin,
 }
 
 func (e Role) IsValid() bool {
 	switch e {
-	case RoleAdmin, RoleUser:
+	case RoleAdmin, RoleUser, RoleSuperAdmin:
 		return true
 	}
 	return false
