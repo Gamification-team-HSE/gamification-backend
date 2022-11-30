@@ -77,5 +77,6 @@ func modelsUserToAPI(user *models.User) *apiModels.User {
 		CreatedAt: user.CreatedAt,
 		DeletedAt: utils.SqlNullTimeToTime(user.DeletedAt),
 		Role:      apiModels.Role(user.Role),
+		Name:      utils.SqlNullStringToString(user.Name),
 	}
 }
