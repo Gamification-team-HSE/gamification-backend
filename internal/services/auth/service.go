@@ -73,6 +73,10 @@ func (s *service) VerifyCode(ctx context.Context, email string, code int) (strin
 	if err != nil {
 		return "", err
 	}
+	err = s.authRepo.DeleteCode(ctx, email)
+	if err != nil {
+		return "", err
+	}
 	if code != savedCode {
 		return "", fmt.Errorf("invalid code")
 	}

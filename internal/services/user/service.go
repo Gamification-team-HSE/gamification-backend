@@ -14,12 +14,21 @@ type Service interface {
 	InitSuperAdmin(ctx context.Context, admin config.SuperAdmin) error
 	Get(ctx context.Context, id int64) (*models.User, error)
 	Create(ctx context.Context, user *models.User) error
+	List(ctx context.Context) ([]*models.User, error)
 }
 
 type service struct {
 	validate *validator.Validate
 
 	userRepo user.Repository
+}
+
+func (s *service) List(ctx context.Context) ([]*models.User, error) {
+	users, err := s.userRepo.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 func (s *service) Create(ctx context.Context, user *models.User) error {

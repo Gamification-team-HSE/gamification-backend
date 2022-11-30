@@ -3,7 +3,9 @@ package user
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	sq "github.com/Masterminds/squirrel"
+	_ "github.com/lib/pq"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres"
 	"gitlab.com/krespix/gamification-api/pkg/utils"
@@ -23,10 +25,27 @@ type Repository interface {
 	ExistsByEmail(ctx context.Context, email string) (bool, error)
 	// GetByEmail получение юезра по емейлу
 	GetByEmail(ctx context.Context, email string) (*models.User, error)
+	List(ctx context.Context) ([]*models.User, error)
 }
 
 type repository struct {
 	*postgres.Client
+}
+
+func (r *repository) List(ctx context.Context) ([]*models.User, error) {
+	qb := utils.PgQB().Select("*").
+		From(usersTableName)
+	query, _, err := qb.ToSql()
+	if err != nil {
+		return nil, err
+	}
+	var users []*models.User
+	err = r.GetDBx().SelectContext(ctx, &users, query)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return users, nil
 }
 
 func (r *repository) GetByEmail(ctx context.Context, email string) (*models.User, error) {

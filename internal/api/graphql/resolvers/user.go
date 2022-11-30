@@ -3,6 +3,7 @@ package resolvers
 import (
 	"context"
 	"database/sql"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	apiModels "gitlab.com/krespix/gamification-api/pkg/graphql/models"
 	"gitlab.com/krespix/gamification-api/pkg/utils"
@@ -13,14 +14,7 @@ func (r *Resolver) GetUser(ctx context.Context, id int) (*apiModels.User, error)
 	if err != nil {
 		return nil, err
 	}
-	return &apiModels.User{
-		ID:        int(user.ID),
-		ForeignID: utils.SqlNullStringToString(user.ForeignID),
-		Email:     user.Email,
-		CreatedAt: user.CreatedAt,
-		DeletedAt: utils.SqlNullTimeToTime(user.DeletedAt),
-		Role:      apiModels.Role(user.Role),
-	}, nil
+	return modelsUserToAPI(user), nil
 }
 
 func (r *Resolver) CreateUser(ctx context.Context, user apiModels.NewUser) (interface{}, error) {
@@ -47,4 +41,41 @@ func (r *Resolver) CreateUser(ctx context.Context, user apiModels.NewUser) (inte
 	return map[string]interface{}{
 		"status": "success",
 	}, nil
+}
+
+func (r *Resolver) GetUsers(ctx context.Context) ([]*apiModels.User, error) {
+	users, err := r.userService.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]*apiModels.User, 0, len(users))
+	for _, u := range users {
+		res = append(res, modelsUserToAPI(u))
+	}
+	return res, nil
+}
+
+func (r *Resolver) GetCurrentUser(ctx context.Context) (*apiModels.User, error) {
+	claims, ok := utils.GetClaimsFromCtx(ctx)
+	if !ok {
+		return nil, &gqlerror.Error{
+			Message: "access denied: no token in context",
+		}
+	}
+	user, err := r.userService.Get(ctx, claims.ID)
+	if err != nil {
+		return nil, err
+	}
+	return modelsUserToAPI(user), nil
+}
+
+func modelsUserToAPI(user *models.User) *apiModels.User {
+	return &apiModels.User{
+		ID:        int(user.ID),
+		ForeignID: utils.SqlNullStringToString(user.ForeignID),
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+		DeletedAt: utils.SqlNullTimeToTime(user.DeletedAt),
+		Role:      apiModels.Role(user.Role),
+	}
 }

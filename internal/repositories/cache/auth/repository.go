@@ -13,6 +13,7 @@ const (
 type Repository interface {
 	CreateCode(ctx context.Context, email string, code int) error
 	GetCode(ctx context.Context, email string) (int, error)
+	DeleteCode(ctx context.Context, email string) error
 }
 
 type repository struct {
@@ -31,6 +32,11 @@ func (r *repository) GetCode(ctx context.Context, email string) (int, error) {
 	}
 	code := res.(int)
 	return code, nil
+}
+
+func (r *repository) DeleteCode(ctx context.Context, email string) error {
+	r.client.Delete(key(email))
+	return nil
 }
 
 func key(key string) string {

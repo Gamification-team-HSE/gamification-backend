@@ -31,6 +31,16 @@ func (r *queryResolver) GetUser(ctx context.Context, id int) (*models.User, erro
 	panic(fmt.Errorf("not implemented: GetUser - GetUser"))
 }
 
+// GetCurrentUser is the resolver for the GetCurrentUser field.
+func (r *queryResolver) GetCurrentUser(ctx context.Context) (*models.User, error) {
+	panic(fmt.Errorf("not implemented: GetCurrentUser - GetCurrentUser"))
+}
+
+// GetUsers is the resolver for the GetUsers field.
+func (r *queryResolver) GetUsers(ctx context.Context) ([]*models.User, error) {
+	panic(fmt.Errorf("not implemented: GetUsers - GetUsers"))
+}
+
 // Mutation returns server.MutationResolver implementation.
 func (r *Resolver) Mutation() server.MutationResolver { return &mutationResolver{r} }
 
