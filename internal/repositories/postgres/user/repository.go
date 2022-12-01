@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/lib/pq"
 	"gitlab.com/krespix/gamification-api/internal/models"
@@ -42,7 +41,9 @@ func (r *repository) List(ctx context.Context) ([]*models.User, error) {
 	var users []*models.User
 	err = r.GetDBx().SelectContext(ctx, &users, query)
 	if err != nil {
-		fmt.Println(err)
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return users, nil

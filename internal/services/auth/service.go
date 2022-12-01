@@ -38,6 +38,10 @@ type service struct {
 }
 
 func (s *service) SendCode(ctx context.Context, email string) error {
+	err := s.validate.Var(email, "email")
+	if err != nil {
+		return err
+	}
 	exists, err := s.userRepo.ExistsByEmail(ctx, email)
 	if err != nil {
 		return err
@@ -84,7 +88,7 @@ func (s *service) VerifyCode(ctx context.Context, email string, code int) (strin
 	if err != nil {
 		return "", err
 	}
-	token, err := s.generateToken(usr.ID, usr.Email, usr.Role)
+	token, err := generateToken(usr.ID, usr.Email, usr.Role, s.jwtSecret, s.defaultExpiration)
 	if err != nil {
 		return "", err
 	}
@@ -96,14 +100,14 @@ func generateCode() int {
 	return low + r.Intn(high-low)
 }
 
-func (s *service) generateToken(id int64, email string, role models.Role) (string, error) {
+func generateToken(id int64, email string, role models.Role, jwtSecret string, defaultExpiration time.Duration) (string, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, &models.Claims{
 		ID:        id,
 		Email:     email,
 		Role:      role,
-		ExpiresAt: time.Now().Add(s.defaultExpiration),
+		ExpiresAt: time.Now().Add(defaultExpiration),
 	})
-	token, err := t.SignedString([]byte(s.jwtSecret))
+	token, err := t.SignedString([]byte(jwtSecret))
 	if err != nil {
 		return "", err
 	}
