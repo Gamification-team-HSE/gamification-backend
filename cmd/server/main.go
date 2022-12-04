@@ -3,10 +3,8 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-playground/validator/v10"
-	"github.com/pressly/goose/v3"
 	"gitlab.com/krespix/gamification-api/internal/api/graphql/resolvers"
 	httpAPI "gitlab.com/krespix/gamification-api/internal/api/http"
 	"gitlab.com/krespix/gamification-api/internal/clients/smtp"
@@ -21,7 +19,6 @@ import (
 	authService "gitlab.com/krespix/gamification-api/internal/services/auth"
 	userService "gitlab.com/krespix/gamification-api/internal/services/user"
 	"go.uber.org/zap"
-	"os"
 	"time"
 )
 
@@ -59,6 +56,7 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 			TracesSampleRate: 1.0,
 		})
 		if err != nil {
+			logging.From(ctx).Error("failed to init sentry", zap.Error(err))
 			return nil, err
 		}
 	}
@@ -83,6 +81,7 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	//init super admin
 	err = userSrc.InitSuperAdmin(ctx, cfg.SuperAdmin)
 	if err != nil {
+		logging.From(ctx).Error("failed to init super admin", zap.Error(err))
 		return nil, err
 	}
 
@@ -108,18 +107,18 @@ func initDatabase(ctx context.Context, cfg *config.Config, a *app.App) (*postgre
 		return nil, err
 	}
 
-	if err := goose.SetDialect("postgres"); err != nil {
-		return nil, err
-	}
-
-	currDir, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
-	if err := goose.Up(db.GetDB(), fmt.Sprintf("%s/migrations", currDir)); err != nil {
-		return nil, err
-	}
+	//if err := goose.SetDialect("postgres"); err != nil {
+	//	return nil, err
+	//}
+	//
+	//currDir, err := os.Getwd()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//if err := goose.Up(db.GetDB(), fmt.Sprintf("%s/migrations", currDir)); err != nil {
+	//	return nil, err
+	//}
 
 	a.OnShutdown(func() {
 		// Shutdown connection when server terminated

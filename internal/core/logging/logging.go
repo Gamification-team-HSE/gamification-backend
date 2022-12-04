@@ -27,7 +27,7 @@ var defaultLogger = zap.New(zapcore.NewCore(
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}),
 	zapcore.AddSync(os.Stdout),
-	zap.NewAtomicLevelAt(zapcore.InfoLevel),
+	zap.NewAtomicLevelAt(zapcore.DebugLevel),
 ), zap.AddCaller(), zap.AddCallerSkip(1))
 
 // From returns the logger associated with the given context.

@@ -32,10 +32,34 @@ jobs:
             SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
             SUPER_ADMIN_EMAIL=${{ secrets.SUPER_ADMIN_EMAIL }}
 
+  migration:
+    name: migrations
+    needs: [build]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        go-version: [ 1.19.x ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Install goose
+        run: go install github.com/pressly/goose/v3/cmd/goose@latest
+
+      - name: Run migrations
+        run: goose postgres "user=gamification_api password=${{ secrets.DB_PASSWORD }} dbname=gamification_api host=vartose.fvds.ru port=5432 sslmode=disable" up -dir ./migrations
+
+
   deploy:
     name: deploy
     needs: [build]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Deploy docker container webhook
         uses: joelwmale/webhook-action@master
