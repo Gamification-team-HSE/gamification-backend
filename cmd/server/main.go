@@ -107,19 +107,6 @@ func initDatabase(ctx context.Context, cfg *config.Config, a *app.App) (*postgre
 		return nil, err
 	}
 
-	//if err := goose.SetDialect("postgres"); err != nil {
-	//	return nil, err
-	//}
-	//
-	//currDir, err := os.Getwd()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//if err := goose.Up(db.GetDB(), fmt.Sprintf("%s/migrations", currDir)); err != nil {
-	//	return nil, err
-	//}
-
 	a.OnShutdown(func() {
 		// Shutdown connection when server terminated
 		logging.From(ctx).Info("shutting down db connection")
