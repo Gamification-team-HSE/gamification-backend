@@ -51,7 +51,7 @@ jobs:
 
       - name: Install goose
         run: go install github.com/pressly/goose/v3/cmd/goose@latest
-
+      - run: pwd
       - name: Run migrations
         run: goose postgres "user=gamification_api password=${{ secrets.DB_PASSWORD }} dbname=gamification_api host=vartose.fvds.ru port=5432 sslmode=disable" up
         working-directory: ./migrations
