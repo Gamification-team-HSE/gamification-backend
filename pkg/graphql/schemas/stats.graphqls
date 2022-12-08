@@ -1,0 +1,18 @@
+type Stat {
+    id: Int!
+    name: String!
+    description: String
+    created_at: Time!
+    start_at: Time!
+    period: String!
+    seq_period: String
+}
+
+input NewStat {
+    name: String!
+    description: String
+    start_at: Time
+    period: String
+    seq_period: String
+}
+

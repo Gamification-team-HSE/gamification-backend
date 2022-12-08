@@ -13,6 +13,8 @@ type Query {
 type Mutation {
     SendCode(email: String!): Any
     VerifyCode(email: String!, code: Int!): String!
-
     CreateUser(user: NewUser!): Any @auth @goField(forceResolver: true)
+    CreateStat(stat: NewStat!): Any @goField(forceResolver: true)
 }
+
+
