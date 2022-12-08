@@ -1,13 +1,11 @@
 package resolvers
 
 import (
-	"context"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	apiModels "gitlab.com/krespix/gamification-api/pkg/graphql/models"
-	"gitlab.com/krespix/gamification-api/pkg/utils"
 )
 
-func (r *Resolver) CreateStat(ctx context.Context, stat apiModels.NewStat) (interface{}, error) {
+func (r *Resolver) CreateStat(stat apiModels.NewStat) (interface{}, error) {
 	mStat := &models.Stat{
 		Name: stat.Name,
 	}
@@ -26,6 +24,7 @@ func (r *Resolver) CreateStat(ctx context.Context, stat apiModels.NewStat) (inte
 	}, nil
 }
 
+/*
 func modelsStatToAPI(stat *models.Stat) *apiModels.Stat {
 	return &apiModels.Stat{
 		ID:          int(stat.ID),
@@ -37,3 +36,4 @@ func modelsStatToAPI(stat *models.Stat) *apiModels.Stat {
 		SeqPeriod:   utils.SqlNullStringToString(stat.SeqPeriod),
 	}
 }
+*/
