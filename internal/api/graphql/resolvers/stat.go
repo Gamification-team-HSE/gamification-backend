@@ -1,11 +1,12 @@
 package resolvers
 
 import (
+	"context"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	apiModels "gitlab.com/krespix/gamification-api/pkg/graphql/models"
 )
 
-func (r *Resolver) CreateStat(stat apiModels.NewStat) (interface{}, error) {
+func (r *Resolver) CreateStat(ctx context.Context, stat apiModels.NewStat) (interface{}, error) {
 	mStat := &models.Stat{
 		Name: stat.Name,
 	}
