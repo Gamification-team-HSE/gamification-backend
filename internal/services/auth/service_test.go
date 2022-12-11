@@ -135,7 +135,7 @@ var _ = Describe("test auth service", func() {
 				},
 				Role: "user",
 			}
-			token, _ = generateToken(repoUser.ID, repoUser.Email, repoUser.Role, jwtSecret, defExpiration)
+			token, _ = generateToken(repoUser.ID, repoUser.Role, jwtSecret, defExpiration)
 		})
 		It("ok", func() {
 			userRepo.On("Get", ctx, repoUser.ID).Return(repoUser, nil)
@@ -144,7 +144,6 @@ var _ = Describe("test auth service", func() {
 
 			Ω(err).ShouldNot(HaveOccurred())
 			Ω(res.ID).Should(Equal(repoUser.ID))
-			Ω(res.Email).Should(Equal(repoUser.Email))
 			Ω(res.Role).Should(Equal(repoUser.Role))
 		})
 		It("error user deleted", func() {

@@ -65,7 +65,7 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 
 	//init clients
 	smtpClient := smtp.New(cfg.SMTP)
-	cacheClient := cache.New(time.Second*60, time.Second*70)
+	cacheClient := cache.New(time.Minute*5, time.Minute*10)
 
 	//init repositories
 	userRepo := userRepository.New(db)
@@ -73,10 +73,10 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 
 	//init services
 	userSrc := userService.New(userRepo, validate)
-	authSrc := authService.New(smtpClient, userRepo, authRepo, validate, cfg.JWT.Secret, time.Hour*24)
+	authSrc := authService.New(smtpClient, userRepo, authRepo, validate, cfg.Auth.JWTSecret, time.Hour*24)
 
 	resolver := resolvers.New(userSrc, authSrc)
-	httpServer := httpAPI.New(resolver, authSrc)
+	httpServer := httpAPI.New(resolver, authSrc, cfg.Auth.FakeAuthEnabled, cfg.HTTP.AllowedMethods, cfg.HTTP.AllowedHeaders, cfg.Auth.FakeAuthHeaders)
 
 	//init super admin
 	err = userSrc.InitSuperAdmin(ctx, cfg.SuperAdmin)
