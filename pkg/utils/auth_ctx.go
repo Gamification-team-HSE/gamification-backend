@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	claimsContextKey struct{} = struct{}{}
+	claimsContextKey = struct{}{}
 )
 
 func GetClaimsFromCtx(ctx context.Context) (*models.Claims, bool) {

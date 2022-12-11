@@ -19,15 +19,23 @@ import (
 
 // Server represents an HTTP server that can handle requests for this microservice.
 type Server struct {
-	resolver    server.ResolverRoot
-	authService auth.Service
+	resolver       server.ResolverRoot
+	authService    auth.Service
+	fakeAuth       bool
+	allowedMethods string
+	allowedHeaders string
+	fakeHeaders    string
 }
 
 // New will instantiate a new instance of Server.
-func New(resolver server.ResolverRoot, authSvc auth.Service) *Server {
+func New(resolver server.ResolverRoot, authSvc auth.Service, fakeAuth bool, allowedMethods, allowedHeaders, fakeHeaders string) *Server {
 	return &Server{
-		resolver:    resolver,
-		authService: authSvc,
+		resolver:       resolver,
+		authService:    authSvc,
+		fakeAuth:       fakeAuth,
+		allowedHeaders: allowedHeaders,
+		allowedMethods: allowedMethods,
+		fakeHeaders:    fakeHeaders,
 	}
 }
 
@@ -46,15 +54,19 @@ func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 	})
 	srv := handler.NewDefaultServer(schema)
 
-	baseRouter.Use(middlewares.EnableCORS)
+	headers := s.allowedHeaders
+	if s.fakeAuth {
+		headers = s.fakeHeaders
+	}
+	authmw := middlewares.NewAuth(s.authService, headers, s.allowedMethods, s.fakeAuth)
+
+	baseRouter.Use(authmw.EnableCORS)
 	baseRouter.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"*"},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
 	}).Handler)
-
-	authmw := middlewares.NewAuth(s.authService)
 
 	graphqlRouter := baseRouter.PathPrefix("/gapi/v1").Subrouter()
 	apiSubRouter := baseRouter.PathPrefix("/api").Subrouter()

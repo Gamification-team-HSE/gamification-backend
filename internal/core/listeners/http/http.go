@@ -25,7 +25,9 @@ const (
 
 // Config represents the configuration of the http listener.
 type Config struct {
-	Port string `yaml:"port"`
+	Port           string `yaml:"port"`
+	AllowedMethods string `yaml:"allowed_methods"`
+	AllowedHeaders string `yaml:"allowed_headers"`
 }
 
 // Service represents a http service that provides routes for the listener.

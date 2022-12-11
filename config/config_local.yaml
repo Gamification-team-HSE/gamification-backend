@@ -1,5 +1,7 @@
 http:
   port: "8080"
+  allowed_methods: "POST, GET, OPTIONS, DELETE"
+  allowed_headers: "Content-Type, Authorization"
 
 db:
   host: "localhost"
@@ -19,3 +21,7 @@ smtp:
   host: "smtp.mail.ru"
   port: "587"
   email: "gamification-noreply@mail.ru"
+
+auth:
+  fake_auth_enabled: true
+  fake_auth_headers: "Content-Type, Authorization, X-Auth-Role, X-Auth-User-ID"

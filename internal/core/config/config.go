@@ -13,5 +13,5 @@ type AppConfig struct {
 	Sentry     SentryOpts      `yaml:"sentry"`
 	SuperAdmin SuperAdmin      `yaml:"super_admin"`
 	SMTP       smtp.Options    `yaml:"smtp"`
-	JWT        JWT
+	Auth       Auth            `yaml:"auth"`
 }

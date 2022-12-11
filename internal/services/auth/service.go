@@ -88,7 +88,7 @@ func (s *service) VerifyCode(ctx context.Context, email string, code int) (strin
 	if err != nil {
 		return "", err
 	}
-	token, err := generateToken(usr.ID, usr.Email, usr.Role, s.jwtSecret, s.defaultExpiration)
+	token, err := generateToken(usr.ID, usr.Role, s.jwtSecret, s.defaultExpiration)
 	if err != nil {
 		return "", err
 	}
@@ -100,10 +100,9 @@ func generateCode() int {
 	return low + r.Intn(high-low)
 }
 
-func generateToken(id int64, email string, role models.Role, jwtSecret string, defaultExpiration time.Duration) (string, error) {
+func generateToken(id int64, role models.Role, jwtSecret string, defaultExpiration time.Duration) (string, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, &models.Claims{
 		ID:        id,
-		Email:     email,
 		Role:      role,
 		ExpiresAt: time.Now().Add(defaultExpiration),
 	})

@@ -7,7 +7,6 @@ import (
 
 type Claims struct {
 	ID        int64     `json:"id" validate:"required"`
-	Email     string    `json:"email" validate:"required,email"`
 	Role      Role      `json:"role" validate:"required"`
 	ExpiresAt time.Time `json:"expires_at" validate:"required"`
 }
