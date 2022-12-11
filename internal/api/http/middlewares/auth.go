@@ -23,7 +23,7 @@ func (a *Auth) AuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		if a.fakeAuth {
+		if a.fakeAuth && claims == nil {
 			claims = a.tryGetFakeClaims(r)
 		}
 		if claims == nil {
