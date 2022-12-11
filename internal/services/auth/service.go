@@ -6,9 +6,11 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v4"
 	"gitlab.com/krespix/gamification-api/internal/clients/smtp"
+	"gitlab.com/krespix/gamification-api/internal/core/logging"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	"gitlab.com/krespix/gamification-api/internal/repositories/cache/auth"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/user"
+	"go.uber.org/zap"
 	"math/rand"
 	"time"
 )
@@ -81,8 +83,10 @@ func (s *service) VerifyCode(ctx context.Context, email string, code int) (strin
 	if err != nil {
 		return "", err
 	}
+	logging.From(ctx).Info("saved code: ", zap.Int("saved_code", savedCode))
+	logging.From(ctx).Info("received code: ", zap.Int("received_code", code))
 	if code != savedCode {
-		return "", fmt.Errorf("invalid code")
+		return "", fmt.Errorf("received code does not match with saved")
 	}
 	usr, err := s.userRepo.GetByEmail(ctx, email)
 	if err != nil {

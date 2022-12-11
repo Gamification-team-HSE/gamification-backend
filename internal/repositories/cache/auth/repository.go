@@ -28,7 +28,7 @@ func (r *repository) CreateCode(ctx context.Context, email string, code int) err
 func (r *repository) GetCode(ctx context.Context, email string) (int, error) {
 	res, found := r.client.Get(key(email))
 	if !found {
-		return 0, fmt.Errorf("not found")
+		return 0, fmt.Errorf("code not found by email")
 	}
 	code := res.(int)
 	return code, nil
