@@ -9,21 +9,11 @@ import (
 )
 
 type Service interface {
-	Get(ctx context.Context, id int64) (*models.Stat, error)
 	Create(ctx context.Context, user *models.Stat) error
-	List(ctx context.Context) ([]*models.Stat, error)
 }
 type service struct {
 	validate *validator.Validate
 	statRepo stat.Repository
-}
-
-func (s *service) List(ctx context.Context) ([]*models.Stat, error) {
-	stats, err := s.statRepo.List(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return stats, nil
 }
 
 func (s *service) Create(ctx context.Context, stat *models.Stat) error {
@@ -41,9 +31,6 @@ func (s *service) Create(ctx context.Context, stat *models.Stat) error {
 	return s.statRepo.Create(ctx, stat)
 }
 
-func (s *service) Get(ctx context.Context, id int64) (*models.Stat, error) {
-	return s.statRepo.Get(ctx, id)
-}
-func New(userRepo stat.Repository, validate *validator.Validate) Service {
-	return &service{statRepo: userRepo, validate: validate}
+func New(statRepo stat.Repository, validate *validator.Validate) Service {
+	return &service{statRepo: statRepo, validate: validate}
 }
