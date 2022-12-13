@@ -6,7 +6,8 @@ import (
 	apiModels "gitlab.com/krespix/gamification-api/pkg/graphql/models"
 )
 
-// Предполагаю что ошибка где-то тут
+//error must be here
+
 func (r *Resolver) CreateStat(ctx context.Context, stat apiModels.NewStat) (interface{}, error) {
 	mStat := &models.Stat{
 		Name: stat.Name,
