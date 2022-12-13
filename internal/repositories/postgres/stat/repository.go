@@ -124,3 +124,9 @@ func (r *repository) Create(ctx context.Context, stat *models.Stat) error {
 
 	return nil
 }
+
+func New(client *postgres.Client) Repository {
+	return &repository{
+		Client: client,
+	}
+}

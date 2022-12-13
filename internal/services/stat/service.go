@@ -44,3 +44,6 @@ func (s *service) Create(ctx context.Context, stat *models.Stat) error {
 func (s *service) Get(ctx context.Context, id int64) (*models.Stat, error) {
 	return s.statRepo.Get(ctx, id)
 }
+func New(userRepo stat.Repository, validate *validator.Validate) Service {
+	return &service{statRepo: userRepo, validate: validate}
+}

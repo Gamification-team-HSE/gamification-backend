@@ -15,8 +15,10 @@ import (
 	"gitlab.com/krespix/gamification-api/internal/repositories/cache"
 	authRepository "gitlab.com/krespix/gamification-api/internal/repositories/cache/auth"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres"
+	statRepository "gitlab.com/krespix/gamification-api/internal/repositories/postgres/stat"
 	userRepository "gitlab.com/krespix/gamification-api/internal/repositories/postgres/user"
 	authService "gitlab.com/krespix/gamification-api/internal/services/auth"
+	statService "gitlab.com/krespix/gamification-api/internal/services/stat"
 	userService "gitlab.com/krespix/gamification-api/internal/services/user"
 	"go.uber.org/zap"
 	"time"
@@ -70,12 +72,14 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	//init repositories
 	userRepo := userRepository.New(db)
 	authRepo := authRepository.New(cacheClient)
+	statRepo := statRepository.New(db)
 
 	//init services
 	userSrc := userService.New(userRepo, validate)
 	authSrc := authService.New(smtpClient, userRepo, authRepo, validate, cfg.JWT.Secret, time.Hour*24)
+	statSrc := statService.New(statRepo, validate)
 
-	resolver := resolvers.New(userSrc, authSrc)
+	resolver := resolvers.New(userSrc, authSrc, statSrc)
 	httpServer := httpAPI.New(resolver, authSrc)
 
 	//init super admin
