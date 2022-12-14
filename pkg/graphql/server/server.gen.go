@@ -42,7 +42,8 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Auth func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	AdminOnly func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	Auth      func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -362,6 +363,7 @@ var sources = []*ast.Source{
 directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
 directive @auth on FIELD_DEFINITION
+directive @adminOnly on FIELD_DEFINITION
 
 type Query {
     GetUser(id: Int!): User! @auth @goField(forceResolver: true)
@@ -373,7 +375,7 @@ type Mutation {
     SendCode(email: String!): Any
     VerifyCode(email: String!, code: Int!): String!
     CreateUser(user: NewUser!): Any @auth @goField(forceResolver: true)
-    CreateStat(stat: NewStat!): Any @goField(forceResolver: true)
+    CreateStat(stat: NewStat!): Any @auth @adminOnly @goField(forceResolver: true)
 }
 
 
@@ -758,8 +760,34 @@ func (ec *executionContext) _Mutation_CreateStat(ctx context.Context, field grap
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateStat(rctx, fc.Args["stat"].(models.NewStat))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateStat(rctx, fc.Args["stat"].(models.NewStat))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Auth == nil {
+				return nil, errors.New("directive auth is not implemented")
+			}
+			return ec.directives.Auth(ctx, nil, directive0)
+		}
+		directive2 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.AdminOnly == nil {
+				return nil, errors.New("directive adminOnly is not implemented")
+			}
+			return ec.directives.AdminOnly(ctx, nil, directive1)
+		}
+
+		tmp, err := directive2(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(interface{}); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be interface{}`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
