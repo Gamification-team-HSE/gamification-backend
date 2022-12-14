@@ -10,6 +10,8 @@ type SuperAdmin struct {
 	Name  string `yaml:"name"`
 }
 
-type JWT struct {
-	Secret string `env:"JWT_SECRET"`
+type Auth struct {
+	FakeAuthEnabled bool   `yaml:"fake_auth_enabled"`
+	JWTSecret       string `env:"JWT_SECRET"`
+	FakeAuthHeaders string `yaml:"fake_auth_headers"`
 }
