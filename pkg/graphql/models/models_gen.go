@@ -9,11 +9,29 @@ import (
 	"time"
 )
 
+type NewStat struct {
+	Name        string     `json:"name"`
+	Description *string    `json:"description"`
+	StartAt     *time.Time `json:"start_at"`
+	Period      *string    `json:"period"`
+	SeqPeriod   *string    `json:"seq_period"`
+}
+
 type NewUser struct {
 	ForeignID *string `json:"foreign_id"`
 	Email     string  `json:"email"`
 	Role      Role    `json:"Role"`
 	Name      *string `json:"Name"`
+}
+
+type Stat struct {
+	ID          int       `json:"id"`
+	Name        string    `json:"name"`
+	Description *string   `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+	StartAt     time.Time `json:"start_at"`
+	Period      string    `json:"period"`
+	SeqPeriod   *string   `json:"seq_period"`
 }
 
 type User struct {

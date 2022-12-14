@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
-	"gitlab.com/krespix/gamification-api/internal/api/graphql/directives"
+	directives "gitlab.com/krespix/gamification-api/internal/api/graphql/directives"
 	"gitlab.com/krespix/gamification-api/internal/api/http/middlewares"
 	"gitlab.com/krespix/gamification-api/internal/core/metrics"
 	"gitlab.com/krespix/gamification-api/internal/services/auth"
@@ -49,8 +49,11 @@ func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 	}))
 
 	schema := server.NewExecutableSchema(server.Config{
-		Resolvers:  s.resolver,
-		Directives: server.DirectiveRoot{Auth: directives.Auth},
+		Resolvers: s.resolver,
+		Directives: server.DirectiveRoot{
+			Auth:      directives.Auth,
+			AdminOnly: directives.AdminOnly,
+		},
 	})
 	srv := handler.NewDefaultServer(schema)
 

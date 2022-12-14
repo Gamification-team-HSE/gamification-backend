@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"gitlab.com/krespix/gamification-api/internal/services/auth"
+	"gitlab.com/krespix/gamification-api/internal/services/stat"
 	"gitlab.com/krespix/gamification-api/internal/services/user"
 	"gitlab.com/krespix/gamification-api/pkg/graphql/server"
 )
@@ -14,12 +15,14 @@ func (r *Resolver) Query() server.QueryResolver { return r }
 
 type Resolver struct {
 	userService user.Service
+	statService stat.Service
 	authService auth.Service
 }
 
-func New(userService user.Service, authService auth.Service) *Resolver {
+func New(userService user.Service, authService auth.Service, statService stat.Service) *Resolver {
 	return &Resolver{
 		userService: userService,
 		authService: authService,
+		statService: statService,
 	}
 }
