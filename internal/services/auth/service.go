@@ -77,12 +77,12 @@ func (s *service) VerifyCode(ctx context.Context, email string, code int) (strin
 	if err != nil {
 		return "", err
 	}
+	if code != savedCode {
+		return "", fmt.Errorf("received code does not match with saved")
+	}
 	err = s.authRepo.DeleteCode(ctx, email)
 	if err != nil {
 		return "", err
-	}
-	if code != savedCode {
-		return "", fmt.Errorf("received code does not match with saved")
 	}
 	usr, err := s.userRepo.GetByEmail(ctx, email)
 	if err != nil {
