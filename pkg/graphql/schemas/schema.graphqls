@@ -16,6 +16,7 @@ type Mutation {
     VerifyCode(email: String!, code: Int!): String!
     CreateUser(user: NewUser!): Any @auth @goField(forceResolver: true)
     CreateStat(stat: NewStat!): Any @auth @adminOnly @goField(forceResolver: true)
+    CreateEvent(event: NewEvent!): Any @auth @adminOnly @goField(forceResolver: true)
 }
 
 

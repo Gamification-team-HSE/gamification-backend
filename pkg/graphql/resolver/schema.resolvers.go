@@ -32,6 +32,11 @@ func (r *mutationResolver) CreateStat(ctx context.Context, stat models.NewStat) 
 	panic(fmt.Errorf("not implemented: CreateStat - CreateStat"))
 }
 
+// CreateEvent is the resolver for the CreateEvent field.
+func (r *mutationResolver) CreateEvent(ctx context.Context, event models.NewEvent) (interface{}, error) {
+	panic(fmt.Errorf("not implemented: CreateEvent - CreateEvent"))
+}
+
 // GetUser is the resolver for the GetUser field.
 func (r *queryResolver) GetUser(ctx context.Context, id int) (*models.User, error) {
 	panic(fmt.Errorf("not implemented: GetUser - GetUser"))
