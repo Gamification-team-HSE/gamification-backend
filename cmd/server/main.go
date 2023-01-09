@@ -15,9 +15,11 @@ import (
 	"gitlab.com/krespix/gamification-api/internal/repositories/cache"
 	authRepository "gitlab.com/krespix/gamification-api/internal/repositories/cache/auth"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres"
+	eventRepository "gitlab.com/krespix/gamification-api/internal/repositories/postgres/event"
 	statRepository "gitlab.com/krespix/gamification-api/internal/repositories/postgres/stat"
 	userRepository "gitlab.com/krespix/gamification-api/internal/repositories/postgres/user"
 	authService "gitlab.com/krespix/gamification-api/internal/services/auth"
+	eventService "gitlab.com/krespix/gamification-api/internal/services/event"
 	statService "gitlab.com/krespix/gamification-api/internal/services/stat"
 	userService "gitlab.com/krespix/gamification-api/internal/services/user"
 	"go.uber.org/zap"
@@ -73,15 +75,16 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	userRepo := userRepository.New(db)
 	authRepo := authRepository.New(cacheClient)
 	statRepo := statRepository.New(db)
+	eventRepo := eventRepository.New(db)
 
 	//init services
 	userSrc := userService.New(userRepo, validate)
 	authSrc := authService.New(smtpClient, userRepo, authRepo, validate, cfg.Auth.JWTSecret, time.Hour*24)
 	statSrc := statService.New(statRepo, validate)
+	eventSrc := eventService.New(eventRepo, validate)
 
-	resolver := resolvers.New(userSrc, authSrc, statSrc)
+	resolver := resolvers.New(userSrc, authSrc, statSrc, eventSrc)
 	httpServer := httpAPI.New(resolver, authSrc, cfg.Auth.FakeAuthEnabled, cfg.HTTP.AllowedMethods, cfg.HTTP.AllowedHeaders, cfg.Auth.FakeAuthHeaders)
-
 
 	//init super admin
 	err = userSrc.InitSuperAdmin(ctx, cfg.SuperAdmin)

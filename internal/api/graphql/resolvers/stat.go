@@ -23,7 +23,7 @@ func (r *Resolver) CreateStat(ctx context.Context, stat apiModels.NewStat) (inte
 			Valid:  true,
 		}
 	}
-	mStat.Period = *stat.Period
+	mStat.Period = stat.Period
 
 	err := r.statService.Create(ctx, mStat)
 	if err != nil {
