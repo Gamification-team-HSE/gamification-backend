@@ -31,6 +31,8 @@ jobs:
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
             SUPER_ADMIN_EMAIL=${{ secrets.SUPER_ADMIN_EMAIL }}
+            MINIO_SECRET_ACCESS_KEY=${{ secrets.MINIO_SECRET_ACCESS_KEY }}
+            MINIO_ACCESS_KEY_ID=${{ secrets.MINIO_ACCESS_KEY_ID }}
 
   migration:
     name: migrations

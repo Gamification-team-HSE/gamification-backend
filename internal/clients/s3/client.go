@@ -8,7 +8,7 @@ import (
 type Options struct {
 	Endpoint        string `yaml:"endpoint"`
 	AccessKeyID     string `env:"MINIO_ACCESS_KEY_ID"`
-	SecretAccessKey string `env:"SECRET_ACCESS_KEY"`
+	SecretAccessKey string `env:"MINIO_SECRET_ACCESS_KEY"`
 	UseSSL          bool   `yaml:"use_ssl"`
 }
 
