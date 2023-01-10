@@ -1,6 +1,7 @@
 package config
 
 import (
+	"gitlab.com/krespix/gamification-api/internal/clients/s3"
 	"gitlab.com/krespix/gamification-api/internal/clients/smtp"
 	"gitlab.com/krespix/gamification-api/internal/core/listeners/http"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres"
@@ -14,4 +15,5 @@ type AppConfig struct {
 	SuperAdmin SuperAdmin      `yaml:"super_admin"`
 	SMTP       smtp.Options    `yaml:"smtp"`
 	Auth       Auth            `yaml:"auth"`
+	S3         s3.Options      `yaml:"s3"`
 }

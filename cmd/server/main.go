@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"gitlab.com/krespix/gamification-api/internal/api/graphql/resolvers"
 	httpAPI "gitlab.com/krespix/gamification-api/internal/api/http"
+	"gitlab.com/krespix/gamification-api/internal/clients/s3"
 	"gitlab.com/krespix/gamification-api/internal/clients/smtp"
 	"gitlab.com/krespix/gamification-api/internal/config"
 	"gitlab.com/krespix/gamification-api/internal/core/app"
@@ -63,6 +64,9 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 		}
 	}
 
+	//TODO
+	_, _ = s3.New(cfg.S3)
+
 	validate := validator.New()
 
 	//init clients
@@ -80,8 +84,7 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	statSrc := statService.New(statRepo, validate)
 
 	resolver := resolvers.New(userSrc, authSrc, statSrc)
-	httpServer := httpAPI.New(resolver, authSrc, cfg.Auth.FakeAuthEnabled, cfg.HTTP.AllowedMethods, cfg.HTTP.AllowedHeaders, cfg.Auth.FakeAuthHeaders)
-
+	httpServer := httpAPI.New(resolver, authSrc, cfg.Auth.FakeAuthEnabled, cfg.HTTP.AllowedMethods, cfg.HTTP.AllowedHeaders, cfg.Auth.FakeAuthHeaders, cfg.HTTP.Filepath)
 
 	//init super admin
 	err = userSrc.InitSuperAdmin(ctx, cfg.SuperAdmin)

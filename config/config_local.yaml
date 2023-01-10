@@ -2,6 +2,7 @@ http:
   port: "8080"
   allowed_methods: "POST, GET, OPTIONS, DELETE"
   allowed_headers: "Content-Type, Authorization"
+  filepath: "./files/"
 
 db:
   host: "localhost"
@@ -25,3 +26,7 @@ smtp:
 auth:
   fake_auth_enabled: true
   fake_auth_headers: "Content-Type, Authorization, X-Auth-Role, X-Auth-User-ID"
+
+s3:
+  endpoint: "vartose.fvds.ru:9002"
+  use_ssl: false
