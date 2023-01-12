@@ -3,7 +3,8 @@ package http
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"net/http"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5/middleware"
@@ -15,7 +16,6 @@ import (
 	"gitlab.com/krespix/gamification-api/internal/core/metrics"
 	"gitlab.com/krespix/gamification-api/internal/services/auth"
 	"gitlab.com/krespix/gamification-api/pkg/graphql/server"
-	"net/http"
 )
 
 // Server represents an HTTP server that can handle requests for this microservice.
@@ -26,11 +26,10 @@ type Server struct {
 	allowedMethods string
 	allowedHeaders string
 	fakeHeaders    string
-	filepath       string
 }
 
 // New will instantiate a new instance of Server.
-func New(resolver server.ResolverRoot, authSvc auth.Service, fakeAuth bool, allowedMethods, allowedHeaders, fakeHeaders, filepath string) *Server {
+func New(resolver server.ResolverRoot, authSvc auth.Service, fakeAuth bool, allowedMethods, allowedHeaders, fakeHeaders string) *Server {
 	return &Server{
 		resolver:       resolver,
 		authService:    authSvc,
@@ -38,7 +37,6 @@ func New(resolver server.ResolverRoot, authSvc auth.Service, fakeAuth bool, allo
 		allowedHeaders: allowedHeaders,
 		allowedMethods: allowedMethods,
 		fakeHeaders:    fakeHeaders,
-		filepath:       filepath,
 	}
 }
 
@@ -86,10 +84,6 @@ func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 
 	v1SubRouter.Use(middlewares.IncrementIncomingRequestsMiddleware)
 	v1SubRouter.Handle("/health", healthHandler).Methods(http.MethodGet)
-
-	fmt.Println(s.filepath)
-	files := http.StripPrefix("/files/", http.FileServer(http.Dir(s.filepath)))
-	baseRouter.PathPrefix("/files/").Handler(files)
 
 	return nil
 }
