@@ -2,7 +2,6 @@ http:
   port: "8080"
   allowed_methods: "POST, GET, OPTIONS, DELETE"
   allowed_headers: "Content-Type, Authorization"
-  filepath: "/minio/"
 
 db:
   host: "vartose.fvds.ru"
@@ -28,5 +27,5 @@ auth:
   fake_auth_headers: "Content-Type, Authorization, X-Auth-Role, X-Auth-User-ID"
 
 s3:
-  endpoint: "vartose.fvds.ru:9002"
-  use_ssl: false
+  endpoint: "s3.storage.selcloud.ru"
+  region: "ru-1"

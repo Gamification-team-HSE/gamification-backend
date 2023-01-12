@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"flag"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-playground/validator/v10"
 	"gitlab.com/krespix/gamification-api/internal/api/graphql/resolvers"
@@ -22,7 +24,6 @@ import (
 	statService "gitlab.com/krespix/gamification-api/internal/services/stat"
 	userService "gitlab.com/krespix/gamification-api/internal/services/user"
 	"go.uber.org/zap"
-	"time"
 )
 
 const defaultConfigPath = "config/config.yaml"
@@ -64,8 +65,10 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 		}
 	}
 
-	//TODO
-	_, _ = s3.New(cfg.S3)
+	_, err = s3.New(cfg.S3)
+	if err != nil {
+		return nil, err
+	}
 
 	validate := validator.New()
 
@@ -84,7 +87,7 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	statSrc := statService.New(statRepo, validate)
 
 	resolver := resolvers.New(userSrc, authSrc, statSrc)
-	httpServer := httpAPI.New(resolver, authSrc, cfg.Auth.FakeAuthEnabled, cfg.HTTP.AllowedMethods, cfg.HTTP.AllowedHeaders, cfg.Auth.FakeAuthHeaders, cfg.HTTP.Filepath)
+	httpServer := httpAPI.New(resolver, authSrc, cfg.Auth.FakeAuthEnabled, cfg.HTTP.AllowedMethods, cfg.HTTP.AllowedHeaders, cfg.Auth.FakeAuthHeaders)
 
 	//init super admin
 	err = userSrc.InitSuperAdmin(ctx, cfg.SuperAdmin)

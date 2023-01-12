@@ -1,36 +1,67 @@
 package s3
 
 import (
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
+	"io"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 type Options struct {
-	Endpoint        string `yaml:"endpoint"`
-	AccessKeyID     string `env:"MINIO_ACCESS_KEY_ID"`
-	SecretAccessKey string `env:"MINIO_SECRET_ACCESS_KEY"`
-	UseSSL          bool   `yaml:"use_ssl"`
+	Endpoint  string `yaml:"endpoint"`
+	AccessKey string `env:"S3_ACCESS_KEY"`
+	SecretKey string `env:"S3_SECRET_KEY"`
+	Region    string `yaml:"region"`
 }
 
 type Client interface {
-	//TODO methods for add and delete files
+	Put(bucket string, key string, body io.ReadSeeker) error
+	Delete(bucket, key string) error
 }
 
 type client struct {
-	minioClient *minio.Client
+	s3Service *s3.S3
+}
+
+func (c *client) Put(bucket string, key string, body io.ReadSeeker) error {
+	_, err := c.s3Service.PutObject(&s3.PutObjectInput{
+		Body:   body,
+		Key:    aws.String(key),
+		Bucket: aws.String(bucket),
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *client) Delete(bucket, key string) error {
+	_, err := c.s3Service.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func New(opts Options) (Client, error) {
-	// Initialize minio client object.
-	minioClient, err := minio.New(opts.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(opts.AccessKeyID, opts.SecretAccessKey, ""),
-		Secure: opts.UseSSL,
+	region := aws.String(opts.Region)
+	url := aws.String(opts.Endpoint)
+	creds := credentials.NewStaticCredentials(opts.AccessKey, opts.SecretKey, "")
+	sess, err := session.NewSession(&aws.Config{
+		Credentials: creds,
+		Endpoint:    url,
+		Region:      region,
 	})
 	if err != nil {
 		return nil, err
 	}
-
+	svc := s3.New(sess)
 	return &client{
-		minioClient: minioClient,
+		s3Service: svc,
 	}, nil
 }
