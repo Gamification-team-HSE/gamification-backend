@@ -27,5 +27,11 @@ auth:
   fake_auth_headers: "Content-Type, Authorization, X-Auth-Role, X-Auth-User-ID"
 
 s3:
-  endpoint: "s3.storage.selcloud.ru"
-  region: "ru-1"
+  endpoint: "s3.eu-central-1.amazonaws.com"
+  region: "eu-central-1"
+  bucket: "gamification-api"
+
+folders:
+  users: "avatars"
+  achievements: "achievements"
+  events: "events"

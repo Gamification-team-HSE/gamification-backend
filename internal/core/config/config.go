@@ -16,4 +16,5 @@ type AppConfig struct {
 	SMTP       smtp.Options    `yaml:"smtp"`
 	Auth       Auth            `yaml:"auth"`
 	S3         s3.Options      `yaml:"s3"`
+	Buckets    Folders         `yaml:"folders"`
 }

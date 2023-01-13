@@ -18,11 +18,11 @@ const (
 	ErrNotFound = Error("err_not_found: not found")
 )
 
-// ErrSeperator is used to determine the boundaries of the errors in the hierarchy.
+// ErrSeperator is used to determine the boundaries of the graphq_erorrs in the hierarchy.
 const ErrSeperator = " -- "
 
-// Error allows errors to be defined as const errors preventing modification
-// and allowing them to be evaluated against wrapped errors.
+// Error allows graphq_erorrs to be defined as const graphq_erorrs preventing modification
+// and allowing them to be evaluated against wrapped graphq_erorrs.
 type Error string
 
 func (s Error) Error() string {
@@ -49,14 +49,14 @@ func (s Error) As(target interface{}) bool {
 	return false
 }
 
-// Wrap allows errors to wrap an error returned from a 3rd party in
+// Wrap allows graphq_erorrs to wrap an error returned from a 3rd party in
 // a const service error preserving the original cause.
 func (s Error) Wrap(err error) error {
 	return wrappedError{cause: err, msg: string(s)}
 }
 
 // wrappedError is an internal error type that allows the wrapping of
-// underlying errors with Errors.
+// underlying graphq_erorrs with Errors.
 type wrappedError struct {
 	cause error
 	msg   string
@@ -86,18 +86,18 @@ func (w wrappedError) Unwrap() error {
 	return w.cause
 }
 
-// New just wraps errors.New as we don't want to alias the errors package everywhere to use it.
+// New just wraps errors.New as we don't want to alias the graphq_erorrs package everywhere to use it.
 func New(message string) error {
 	//nolint:goerr113
 	return errors.New(message)
 }
 
-// Is just wraps errors.Is as we don't want to alias the errors package everywhere to use it.
+// Is just wraps errors.Is as we don't want to alias the graphq_erorrs package everywhere to use it.
 func Is(err error, target error) bool {
 	return errors.Is(err, target)
 }
 
-// As just wraps errors.As as we don't want to alias the errors package everywhere to use it.
+// As just wraps errors.As as we don't want to alias the graphq_erorrs package everywhere to use it.
 func As(err error, target any) bool {
 	return errors.As(err, target)
 }

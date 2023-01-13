@@ -15,3 +15,9 @@ type Auth struct {
 	JWTSecret       string `env:"JWT_SECRET"`
 	FakeAuthHeaders string `yaml:"fake_auth_headers"`
 }
+
+type Folders struct {
+	Achievements string `yaml:"achievements"`
+	Events       string `yaml:"events"`
+	Users        string `yaml:"users"`
+}

@@ -3,6 +3,7 @@ package resolvers
 import (
 	"context"
 	"database/sql"
+
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	apiModels "gitlab.com/krespix/gamification-api/pkg/graphql/models"
@@ -43,16 +44,115 @@ func (r *Resolver) CreateUser(ctx context.Context, user apiModels.NewUser) (inte
 	}, nil
 }
 
-func (r *Resolver) GetUsers(ctx context.Context) ([]*apiModels.User, error) {
-	users, err := r.userService.List(ctx)
+func (r *Resolver) GetUsers(ctx context.Context, pagination *apiModels.Pagination, filter *apiModels.UserFilter) (*apiModels.GetUsersResponse, error) {
+	var (
+		mPagination *models.Pagination
+		mFilter     *models.UserFilter
+	)
+	if pagination != nil {
+		mPagination = &models.Pagination{
+			Page: pagination.Page,
+			Size: pagination.Size,
+		}
+	}
+	if filter != nil {
+		mFilter = &models.UserFilter{
+			Active: boolPtrToVal(filter.Active),
+			Banned: boolPtrToVal(filter.Banned),
+			Admins: boolPtrToVal(filter.Admins),
+		}
+	}
+	response, err := r.userService.List(ctx, mPagination, mFilter)
 	if err != nil {
 		return nil, err
 	}
-	res := make([]*apiModels.User, 0, len(users))
-	for _, u := range users {
-		res = append(res, modelsUserToAPI(u))
+	userRes := make([]*apiModels.User, 0, len(response.Users))
+	for _, u := range response.Users {
+		userRes = append(userRes, modelsUserToAPI(u))
 	}
-	return res, nil
+	return &apiModels.GetUsersResponse{
+		Users: userRes,
+		Total: &apiModels.UsersTotalInfo{
+			Admins: response.Total.Admins,
+			Banned: response.Total.Banned,
+			Active: response.Total.Active,
+		},
+	}, nil
+}
+
+func boolPtrToVal(ptr *bool) bool {
+	if ptr == nil {
+		return false
+	}
+	return *ptr
+}
+
+func (r *Resolver) UpdateUser(ctx context.Context, user *apiModels.UpdateUser) (interface{}, error) {
+	claims, ok := utils.GetClaimsFromCtx(ctx)
+	if !ok {
+		return nil, &gqlerror.Error{
+			Message: "access denied: no token in context",
+		}
+	}
+	if claims.Role == models.DefaultRole {
+		if int64(user.ID) != claims.ID {
+			return nil, &gqlerror.Error{
+				Message: "access denied: user can update only self profile",
+			}
+		}
+	}
+
+	//TODO image validation
+
+	err := r.userService.Update(ctx, &models.UpdateUser{
+		ID:     user.ID,
+		Email:  stringPtrToValue(user.Email),
+		Name:   stringPtrToValue(user.Name),
+		Avatar: user.Avatar,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"status": "success",
+	}, nil
+}
+
+func stringPtrToValue(ptr *string) string {
+	if ptr == nil {
+		return ""
+	}
+	return *ptr
+}
+
+func (r *Resolver) DeleteUser(ctx context.Context, id int) (interface{}, error) {
+	err := r.userService.Delete(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"status": "success",
+	}, nil
+}
+
+func (r *Resolver) BanUser(ctx context.Context, id int) (interface{}, error) {
+	err := r.userService.Ban(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"status": "success",
+	}, nil
+}
+
+func (r *Resolver) RecoverUser(ctx context.Context, id int) (interface{}, error) {
+	err := r.userService.Recover(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"status": "success",
+	}, nil
 }
 
 func (r *Resolver) GetCurrentUser(ctx context.Context) (*apiModels.User, error) {
@@ -70,7 +170,7 @@ func (r *Resolver) GetCurrentUser(ctx context.Context) (*apiModels.User, error) 
 }
 
 func modelsUserToAPI(user *models.User) *apiModels.User {
-	return &apiModels.User{
+	usr := &apiModels.User{
 		ID:        int(user.ID),
 		ForeignID: utils.SqlNullStringToString(user.ForeignID),
 		Email:     user.Email,
@@ -78,5 +178,7 @@ func modelsUserToAPI(user *models.User) *apiModels.User {
 		DeletedAt: utils.SqlNullTimeToTime(user.DeletedAt),
 		Role:      apiModels.Role(user.Role),
 		Name:      utils.SqlNullStringToString(user.Name),
+		Avatar:    utils.SqlNullStringToString(user.Avatar),
 	}
+	return usr
 }

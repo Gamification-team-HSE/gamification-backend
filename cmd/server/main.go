@@ -65,16 +65,15 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 		}
 	}
 
-	_, err = s3.New(cfg.S3)
-	if err != nil {
-		return nil, err
-	}
-
 	validate := validator.New()
 
 	//init clients
 	smtpClient := smtp.New(cfg.SMTP)
 	cacheClient := cache.New(time.Minute*5, time.Minute*10)
+	s3Client, err := s3.New(cfg.S3)
+	if err != nil {
+		return nil, err
+	}
 
 	//init repositories
 	userRepo := userRepository.New(db)
@@ -82,7 +81,7 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	statRepo := statRepository.New(db)
 
 	//init services
-	userSrc := userService.New(userRepo, validate)
+	userSrc := userService.New(userRepo, validate, s3Client, cfg.Buckets.Users)
 	authSrc := authService.New(smtpClient, userRepo, authRepo, validate, cfg.Auth.JWTSecret, time.Hour*24)
 	statSrc := statService.New(statRepo, validate)
 

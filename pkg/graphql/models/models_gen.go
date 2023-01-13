@@ -7,7 +7,14 @@ import (
 	"io"
 	"strconv"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql"
 )
+
+type GetUsersResponse struct {
+	Users []*User         `json:"users"`
+	Total *UsersTotalInfo `json:"total"`
+}
 
 type NewStat struct {
 	Name        string     `json:"name"`
@@ -20,8 +27,13 @@ type NewStat struct {
 type NewUser struct {
 	ForeignID *string `json:"foreign_id"`
 	Email     string  `json:"email"`
-	Role      Role    `json:"Role"`
-	Name      *string `json:"Name"`
+	Role      Role    `json:"role"`
+	Name      *string `json:"name"`
+}
+
+type Pagination struct {
+	Page int `json:"page"`
+	Size int `json:"size"`
 }
 
 type Stat struct {
@@ -34,6 +46,13 @@ type Stat struct {
 	SeqPeriod   *string   `json:"seq_period"`
 }
 
+type UpdateUser struct {
+	ID     int             `json:"id"`
+	Email  *string         `json:"email"`
+	Avatar *graphql.Upload `json:"avatar"`
+	Name   *string         `json:"name"`
+}
+
 type User struct {
 	ID        int        `json:"id"`
 	ForeignID *string    `json:"foreign_id"`
@@ -43,6 +62,18 @@ type User struct {
 	Role      Role       `json:"role"`
 	Avatar    *string    `json:"avatar"`
 	Name      *string    `json:"name"`
+}
+
+type UserFilter struct {
+	Active *bool `json:"active"`
+	Banned *bool `json:"banned"`
+	Admins *bool `json:"admins"`
+}
+
+type UsersTotalInfo struct {
+	Admins int `json:"admins"`
+	Banned int `json:"banned"`
+	Active int `json:"active"`
 }
 
 type Role string
