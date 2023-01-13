@@ -3,6 +3,8 @@ package models
 import (
 	"database/sql"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type User struct {
@@ -23,3 +25,27 @@ const (
 	AdminRole      Role = "admin"
 	DefaultRole    Role = "user"
 )
+
+type UserFilter struct {
+	Active bool
+	Banned bool
+	Admins bool
+}
+
+type UsersTotalInfo struct {
+	Active int `db:"active"`
+	Banned int `db:"banned"`
+	Admins int `db:"admins"`
+}
+
+type GetUsersResponse struct {
+	Users []*User
+	Total *UsersTotalInfo
+}
+
+type UpdateUser struct {
+	ID     int
+	Email  string
+	Name   string
+	Avatar *graphql.Upload
+}

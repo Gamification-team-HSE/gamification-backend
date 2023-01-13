@@ -1,4 +1,5 @@
 scalar Time
+scalar Upload
 
 type User {
     id: Int!
@@ -20,6 +21,30 @@ enum Role {
 input NewUser {
     foreign_id: String
     email: String!
-    Role: Role!
-    Name: String
+    role: Role!
+    name: String
+}
+
+input UpdateUser {
+    id: Int!
+    email: String
+    avatar: Upload
+    name: String
+}
+
+type GetUsersResponse {
+    users: [User!]!
+    total: UsersTotalInfo!
+}
+
+input UserFilter {
+    active: Boolean
+    banned: Boolean
+    admins: Boolean
+}
+
+type UsersTotalInfo {
+    admins: Int!
+    banned: Int!
+    active: Int!
 }
