@@ -3,11 +3,14 @@ package resolvers
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"gitlab.com/krespix/gamification-api/internal/models"
+	"gitlab.com/krespix/gamification-api/internal/services/image"
 	apiModels "gitlab.com/krespix/gamification-api/pkg/graphql/models"
 	"gitlab.com/krespix/gamification-api/pkg/utils"
+	errors "gitlab.com/krespix/gamification-api/pkg/utils/graphq_erorrs"
 )
 
 func (r *Resolver) GetUser(ctx context.Context, id int) (*apiModels.User, error) {
@@ -102,7 +105,12 @@ func (r *Resolver) UpdateUser(ctx context.Context, user *apiModels.UpdateUser) (
 		}
 	}
 
-	//TODO image validation
+	if user.Avatar != nil {
+		err := r.imageService.Validate(ctx, image.UserAvatarImage, user.Avatar)
+		if err != nil {
+			return nil, errors.CustomError(ctx, 400, fmt.Sprintf("image validation failed: %v", err))
+		}
+	}
 
 	err := r.userService.Update(ctx, &models.UpdateUser{
 		ID:     user.ID,

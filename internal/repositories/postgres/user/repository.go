@@ -116,7 +116,8 @@ func (r *repository) Total(ctx context.Context) (*models.UsersTotalInfo, error) 
 
 func (r *repository) List(ctx context.Context, pagination *models.RepoPagination, filter *models.UserFilter) ([]*models.User, error) {
 	qb := utils.PgQB().Select("*").
-		From(usersTableName)
+		From(usersTableName).
+		OrderBy("created_at")
 	if pagination != nil {
 		qb = qb.Limit(uint64(pagination.Limit))
 		qb = qb.Offset(uint64(pagination.Offset))

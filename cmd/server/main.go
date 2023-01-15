@@ -21,6 +21,7 @@ import (
 	statRepository "gitlab.com/krespix/gamification-api/internal/repositories/postgres/stat"
 	userRepository "gitlab.com/krespix/gamification-api/internal/repositories/postgres/user"
 	authService "gitlab.com/krespix/gamification-api/internal/services/auth"
+	imageService "gitlab.com/krespix/gamification-api/internal/services/image"
 	statService "gitlab.com/krespix/gamification-api/internal/services/stat"
 	userService "gitlab.com/krespix/gamification-api/internal/services/user"
 	"go.uber.org/zap"
@@ -84,8 +85,9 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	userSrc := userService.New(userRepo, validate, s3Client, cfg.Buckets.Users)
 	authSrc := authService.New(smtpClient, userRepo, authRepo, validate, cfg.Auth.JWTSecret, time.Hour*24)
 	statSrc := statService.New(statRepo, validate)
+	imageSrc := imageService.New(cfg.ImageService)
 
-	resolver := resolvers.New(userSrc, authSrc, statSrc)
+	resolver := resolvers.New(userSrc, authSrc, statSrc, imageSrc)
 	httpServer := httpAPI.New(resolver, authSrc, cfg.Auth.FakeAuthEnabled, cfg.HTTP.AllowedMethods, cfg.HTTP.AllowedHeaders, cfg.Auth.FakeAuthHeaders)
 
 	//init super admin

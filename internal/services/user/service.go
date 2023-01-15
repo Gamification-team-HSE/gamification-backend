@@ -10,6 +10,7 @@ import (
 	"gitlab.com/krespix/gamification-api/internal/core/config"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/user"
+	"gitlab.com/krespix/gamification-api/internal/services/image"
 	errors "gitlab.com/krespix/gamification-api/pkg/utils/graphq_erorrs"
 )
 
@@ -34,10 +35,26 @@ type service struct {
 }
 
 func (s *service) Update(ctx context.Context, user *models.UpdateUser) error {
-	//fixme add validation to struct
+	err := s.validate.Struct(user)
+	if err != nil {
+		return errors.CustomError(ctx, 400, fmt.Sprintf("validation failed: %v", err))
+	}
+	//TODO run upload in goroutine
 	if user.Avatar != nil {
-		fmt.Println(s.folder, user.Avatar.Filename)
-		err := s.s3Client.Put(s.folder, user.Avatar.Filename, user.Avatar.File)
+		oldUser, err := s.userRepo.Get(ctx, int64(user.ID))
+		if err != nil {
+			return errors.InternalServerErrorWithDesc(ctx, err)
+		}
+
+		if oldUser.Avatar.Valid {
+			err = s.s3Client.Delete(s.folder, oldUser.Avatar.String)
+			if err != nil {
+				return errors.InternalServerErrorWithDesc(ctx, err)
+			}
+		}
+
+		user.Avatar.Filename = image.GenerateFilename(user.Avatar)
+		err = s.s3Client.Put(s.folder, user.Avatar.Filename, user.Avatar.ContentType, user.Avatar.File)
 		if err != nil {
 			return errors.InternalServerErrorWithDesc(ctx, err)
 		}
