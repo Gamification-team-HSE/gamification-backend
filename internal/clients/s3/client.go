@@ -19,7 +19,7 @@ type Options struct {
 }
 
 type Client interface {
-	Put(folder string, filename string, body io.ReadSeeker) error
+	Put(folder, filename, contentType string, body io.ReadSeeker) error
 	Delete(folder, filename string) error
 	BuildURL(folder, filename string) string
 }
@@ -38,11 +38,12 @@ func key(folder, filename string) string {
 	return fmt.Sprintf("%s/%s", folder, filename)
 }
 
-func (c *client) Put(folder string, filename string, body io.ReadSeeker) error {
+func (c *client) Put(folder, filename, contentType string, body io.ReadSeeker) error {
 	_, err := c.s3Service.PutObject(&s3.PutObjectInput{
-		Body:   body,
-		Key:    aws.String(key(folder, filename)),
-		Bucket: aws.String(c.opts.Bucket),
+		Body:        body,
+		Key:         aws.String(key(folder, filename)),
+		Bucket:      aws.String(c.opts.Bucket),
+		ContentType: aws.String(contentType),
 	})
 	if err != nil {
 		return err
@@ -69,7 +70,6 @@ func New(opts Options) (Client, error) {
 		Credentials: creds,
 		Endpoint:    url,
 		Region:      region,
-		LogLevel:    aws.LogLevel(aws.LogDebugWithHTTPBody),
 	})
 	if err != nil {
 		return nil, err

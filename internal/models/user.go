@@ -14,7 +14,7 @@ type User struct {
 	CreatedAt time.Time      `db:"created_at"`
 	DeletedAt sql.NullTime   `db:"deleted_at"`
 	Role      Role           `db:"role" validate:"required"`
-	Name      sql.NullString `db:"name"`
+	Name      sql.NullString `db:"name" validate:"omitempty,max=256"`
 	Avatar    sql.NullString `db:"avatar"`
 }
 
@@ -44,8 +44,8 @@ type GetUsersResponse struct {
 }
 
 type UpdateUser struct {
-	ID     int
-	Email  string
-	Name   string
+	ID     int    `validate:"required"`
+	Email  string `validate:"omitempty,email"`
+	Name   string `validate:"omitempty,max=256"`
 	Avatar *graphql.Upload
 }

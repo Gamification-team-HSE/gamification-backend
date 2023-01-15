@@ -6,17 +6,15 @@ require (
 	github.com/99designs/gqlgen v0.17.22
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/aws/aws-sdk-go v1.44.179
-	github.com/brianvoe/gofakeit/v6 v6.19.0
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/getsentry/sentry-go v0.14.0
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/golang-jwt/jwt/v4 v4.4.2
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.7.4
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.7
-	github.com/onsi/ginkgo/v2 v2.5.1
-	github.com/onsi/gomega v1.24.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.13.1
 	github.com/rs/cors v1.8.2
@@ -31,11 +29,9 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect

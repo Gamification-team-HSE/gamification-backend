@@ -35,3 +35,14 @@ folders:
   users: "avatars"
   achievements: "achievements"
   events: "events"
+
+image:
+  achievements:
+    max_size: 200000
+    content_types: ["image/png", "image/jpeg"]
+  users:
+    max_size: 200000
+    content_types: ["image/png", "image/jpeg"]
+  events:
+    max_size: 200000
+    content_types: ["image/png", "image/jpeg"]
