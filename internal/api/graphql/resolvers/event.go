@@ -3,8 +3,11 @@ package resolvers
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"gitlab.com/krespix/gamification-api/internal/models"
+	"gitlab.com/krespix/gamification-api/internal/services/image"
 	apiModels "gitlab.com/krespix/gamification-api/pkg/graphql/models"
+	errors "gitlab.com/krespix/gamification-api/pkg/utils/graphq_erorrs"
 )
 
 func (r *Resolver) CreateEvent(ctx context.Context, event apiModels.NewEvent) (interface{}, error) {
@@ -17,12 +20,14 @@ func (r *Resolver) CreateEvent(ctx context.Context, event apiModels.NewEvent) (i
 			Valid:  true,
 		}
 	}
+
 	if event.Image != nil {
-		mEvent.Image = sql.NullString{
-			String: *event.Image,
-			Valid:  true,
+		err := r.imageService.Validate(ctx, image.EventIconImage, event.Image)
+		if err != nil {
+			return nil, errors.CustomError(ctx, 400, fmt.Sprintf("image validation failed: %v", err))
 		}
 	}
+
 	if event.EndAt != nil {
 		mEvent.EndAt = sql.NullTime{
 			Time:  *event.EndAt,

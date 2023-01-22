@@ -17,7 +17,7 @@ type service struct {
 }
 
 func (s *service) Create(ctx context.Context, stat *models.Stat) error {
-	err := s.validate.Struct(stat)
+	err := s.validate.Var(stat.Name, "required")
 	if err != nil {
 		return err
 	}
@@ -31,6 +31,12 @@ func (s *service) Create(ctx context.Context, stat *models.Stat) error {
 	return s.statRepo.Create(ctx, stat)
 }
 
-func New(statRepo stat.Repository, validate *validator.Validate) Service {
-	return &service{statRepo: statRepo, validate: validate}
+func New(
+	statRepo stat.Repository,
+	validate *validator.Validate,
+) Service {
+	return &service{
+		statRepo: statRepo,
+		validate: validate,
+	}
 }

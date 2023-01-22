@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 create table event(
     id          bigserial primary key,
-    "name"      text unique,
+    "name"      text unique not null,
     description text,
     "image"     text,
     created_at  timestamp not null,

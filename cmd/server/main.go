@@ -91,7 +91,7 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	imageSrc := imageService.New(cfg.ImageService)
 	eventSrc := eventService.New(eventRepo, validate)
 
-	resolver := resolvers.New(userSrc, authSrc, statSrc, imageSrc)
+	resolver := resolvers.New(userSrc, authSrc, statSrc, imageSrc, eventSrc)
 	httpServer := httpAPI.New(resolver, authSrc, cfg.Auth.FakeAuthEnabled, cfg.HTTP.AllowedMethods, cfg.HTTP.AllowedHeaders, cfg.Auth.FakeAuthHeaders)
 
 	//init super admin

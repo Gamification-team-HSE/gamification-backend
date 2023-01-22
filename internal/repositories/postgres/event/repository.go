@@ -73,6 +73,21 @@ func (r *repository) Create(ctx context.Context, event *models.Event) error {
 	return nil
 }
 
+func (r *repository) UpdateImage(ctx context.Context, event *models.Event) error {
+	qb := utils.PgQB().Update(eventsTableName).
+		Set("image", event.Image).Where("id", event.ID)
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = r.GetDBx().ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func New(client *postgres.Client) Repository {
 	return &repository{
 		Client: client,

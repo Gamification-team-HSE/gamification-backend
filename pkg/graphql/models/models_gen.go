@@ -27,11 +27,11 @@ type Event struct {
 }
 
 type NewEvent struct {
-	Name        string     `json:"name"`
-	Description *string    `json:"description"`
-	Image       *string    `json:"image"`
-	StartAt     time.Time  `json:"start_at"`
-	EndAt       *time.Time `json:"end_at"`
+	Name        string          `json:"name"`
+	Description *string         `json:"description"`
+	Image       *graphql.Upload `json:"image"`
+	StartAt     time.Time       `json:"start_at"`
+	EndAt       *time.Time      `json:"end_at"`
 }
 
 type NewStat struct {
@@ -69,6 +69,14 @@ type UpdateUser struct {
 	Email  *string         `json:"email"`
 	Avatar *graphql.Upload `json:"avatar"`
 	Name   *string         `json:"name"`
+}
+
+type UpdateEvent struct {
+	Name        *string         `json:"name"`
+	Description *string         `json:"description"`
+	Image       *graphql.Upload `json:"image"`
+	StartAt     *time.Time      `json:"start_at"`
+	EndAt       *time.Time      `json:"end_at"`
 }
 
 type User struct {

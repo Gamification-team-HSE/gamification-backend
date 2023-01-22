@@ -17,10 +17,26 @@ type service struct {
 }
 
 func (s *service) Create(ctx context.Context, event *models.Event) error {
-	err := s.validate.Struct(event)
+	err := s.validate.Var(event.Name, "lte=128")
 	if err != nil {
 		return err
 	}
+
+	err = s.validate.Var(event.Description, "lte=1024")
+	if err != nil {
+		return err
+	}
+
+	err = s.validate.Var(event.StartAt, "gtefield created_at")
+	if err != nil {
+		return err
+	}
+
+	err = s.validate.Var(event.EndAt, "gtfield start_at")
+	if err != nil {
+		return err
+	}
+
 	exists, err := s.eventRepo.ExistsByName(ctx, event.Name)
 	if err != nil {
 		return err
@@ -31,6 +47,12 @@ func (s *service) Create(ctx context.Context, event *models.Event) error {
 	return s.eventRepo.Create(ctx, event)
 }
 
-func New(eventRepo event.Repository, validate *validator.Validate) Service {
-	return &service{eventRepo: eventRepo, validate: validate}
+func New(
+	eventRepo event.Repository,
+	validate *validator.Validate,
+) Service {
+	return &service{
+		eventRepo: eventRepo,
+		validate:  validate,
+	}
 }

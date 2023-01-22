@@ -1,3 +1,5 @@
+scalar Upload
+
 type Event {
     id: Int!
     name: String!
@@ -6,13 +8,20 @@ type Event {
     created_at: Time!
     start_at: Time!
     end_at: Time
-
 }
 
 input NewEvent {
     name: String!
     description: String
-    image: String
+    image: Upload
     start_at: Time!
+    end_at: Time
+}
+
+input UpdateEvent{
+    name: String
+    description: String
+    image: Upload
+    start_at: Time
     end_at: Time
 }
