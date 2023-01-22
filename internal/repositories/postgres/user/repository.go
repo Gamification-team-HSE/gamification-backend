@@ -103,7 +103,7 @@ func (r *repository) Delete(ctx context.Context, id int) error {
 
 func (r *repository) Total(ctx context.Context) (*models.UsersTotalInfo, error) {
 	adminsTotalQuery := "select count(id) from users where (role = 'admin' or role = 'super_admin') and deleted_at is null"
-	activeTotalQuery := "select count(id) from users where deleted_at is null"
+	activeTotalQuery := "select count(id) from users where deleted_at is null and role=user"
 	bannedTotalQuery := "select count(id) from users where deleted_at is not null"
 	query := fmt.Sprintf("select (%s) as admins, (%s) as active, (%s) as banned", adminsTotalQuery, activeTotalQuery, bannedTotalQuery)
 	totalInfo := &models.UsersTotalInfo{}
@@ -124,7 +124,7 @@ func (r *repository) List(ctx context.Context, pagination *models.RepoPagination
 	}
 	if filter != nil {
 		if filter.Active {
-			qb = qb.Where(sq.Expr("deleted_at is null"))
+			qb = qb.Where(sq.Expr("deleted_at is null and role=user"))
 		}
 		if filter.Banned {
 			qb = qb.Where(sq.Expr("deleted_at is not null"))

@@ -39,6 +39,7 @@ func (s *service) Update(ctx context.Context, user *models.UpdateUser) error {
 	if err != nil {
 		return errors.CustomError(ctx, 400, fmt.Sprintf("validation failed: %v", err))
 	}
+	updateUserReq := &models.User{ID: int64(user.ID)}
 	//TODO run upload in goroutine
 	if user.Avatar != nil {
 		oldUser, err := s.userRepo.Get(ctx, int64(user.ID))
@@ -54,23 +55,25 @@ func (s *service) Update(ctx context.Context, user *models.UpdateUser) error {
 		}
 
 		user.Avatar.Filename = image.GenerateFilename(user.Avatar)
+		updateUserReq.Avatar = sql.NullString{
+			String: user.Avatar.Filename,
+			Valid:  true,
+		}
 		err = s.s3Client.Put(s.folder, user.Avatar.Filename, user.Avatar.ContentType, user.Avatar.File)
 		if err != nil {
 			return errors.InternalServerErrorWithDesc(ctx, err)
 		}
 	}
-	return s.userRepo.Update(ctx, user.ID, &models.User{
-		ID:    int64(user.ID),
-		Email: user.Email,
-		Name: sql.NullString{
-			Valid:  true,
+	if user.Name != "" {
+		updateUserReq.Name = sql.NullString{
 			String: user.Name,
-		},
-		Avatar: sql.NullString{
-			String: user.Avatar.Filename,
 			Valid:  true,
-		},
-	})
+		}
+	}
+	if user.Email != "" {
+		updateUserReq.Email = user.Email
+	}
+	return s.userRepo.Update(ctx, user.ID, updateUserReq)
 }
 
 func (s *service) Delete(ctx context.Context, id int) error {
