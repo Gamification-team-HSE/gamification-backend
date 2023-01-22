@@ -27,6 +27,26 @@ func (r *mutationResolver) CreateUser(ctx context.Context, user models.NewUser) 
 	panic(fmt.Errorf("not implemented: CreateUser - CreateUser"))
 }
 
+// UpdateUser is the resolver for the UpdateUser field.
+func (r *mutationResolver) UpdateUser(ctx context.Context, user *models.UpdateUser) (interface{}, error) {
+	panic(fmt.Errorf("not implemented: UpdateUser - UpdateUser"))
+}
+
+// DeleteUser is the resolver for the DeleteUser field.
+func (r *mutationResolver) DeleteUser(ctx context.Context, id int) (interface{}, error) {
+	panic(fmt.Errorf("not implemented: DeleteUser - DeleteUser"))
+}
+
+// BanUser is the resolver for the BanUser field.
+func (r *mutationResolver) BanUser(ctx context.Context, id int) (interface{}, error) {
+	panic(fmt.Errorf("not implemented: BanUser - BanUser"))
+}
+
+// RecoverUser is the resolver for the RecoverUser field.
+func (r *mutationResolver) RecoverUser(ctx context.Context, id int) (interface{}, error) {
+	panic(fmt.Errorf("not implemented: RecoverUser - RecoverUser"))
+}
+
 // CreateStat is the resolver for the CreateStat field.
 func (r *mutationResolver) CreateStat(ctx context.Context, stat models.NewStat) (interface{}, error) {
 	panic(fmt.Errorf("not implemented: CreateStat - CreateStat"))
@@ -48,7 +68,7 @@ func (r *queryResolver) GetCurrentUser(ctx context.Context) (*models.User, error
 }
 
 // GetUsers is the resolver for the GetUsers field.
-func (r *queryResolver) GetUsers(ctx context.Context) ([]*models.User, error) {
+func (r *queryResolver) GetUsers(ctx context.Context, pagination *models.Pagination, filter *models.UserFilter) (*models.GetUsersResponse, error) {
 	panic(fmt.Errorf("not implemented: GetUsers - GetUsers"))
 }
 

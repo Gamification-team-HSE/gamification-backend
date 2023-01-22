@@ -3,6 +3,8 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5/middleware"
@@ -14,7 +16,6 @@ import (
 	"gitlab.com/krespix/gamification-api/internal/core/metrics"
 	"gitlab.com/krespix/gamification-api/internal/services/auth"
 	"gitlab.com/krespix/gamification-api/pkg/graphql/server"
-	"net/http"
 )
 
 // Server represents an HTTP server that can handle requests for this microservice.

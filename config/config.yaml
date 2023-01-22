@@ -25,3 +25,24 @@ smtp:
 auth:
   fake_auth_enabled: true
   fake_auth_headers: "Content-Type, Authorization, X-Auth-Role, X-Auth-User-ID"
+
+s3:
+  endpoint: "s3.eu-central-1.amazonaws.com"
+  region: "eu-central-1"
+  bucket: "gamification-api"
+
+folders:
+  users: "avatars"
+  achievements: "achievements"
+  events: "events"
+
+image:
+  achievements:
+    max_size: 200000
+    content_types: ["image/png", "image/jpeg"]
+  users:
+    max_size: 200000
+    content_types: ["image/png", "image/jpeg"]
+  events:
+    max_size: 200000
+    content_types: ["image/png", "image/jpeg"]

@@ -6,17 +6,34 @@ directive @auth on FIELD_DEFINITION
 directive @adminOnly on FIELD_DEFINITION
 
 type Query {
+    #users common
     GetUser(id: Int!): User! @auth @goField(forceResolver: true)
     GetCurrentUser: User! @auth @goField(forceResolver: true)
-    GetUsers: [User!]! @auth @goField(forceResolver: true)
+    GetUsers(pagination: Pagination, filter: UserFilter): GetUsersResponse! @auth @goField(forceResolver: true)
 }
 
 type Mutation {
+    #auth
     SendCode(email: String!): Any
     VerifyCode(email: String!, code: Int!): String!
-    CreateUser(user: NewUser!): Any @auth @goField(forceResolver: true)
+
+    #users admin only
+    CreateUser(user: NewUser!): Any @auth @adminOnly @goField(forceResolver: true)
+    DeleteUser(id: Int!): Any @auth @adminOnly @goField(forceResolver: true)
+    BanUser(id: Int!): Any @auth @adminOnly @goField(forceResolver: true)
+    RecoverUser(id: Int!): Any @auth @adminOnly @goField(forceResolver: true)
+
+    #users common
+    UpdateUser(user: UpdateUser): Any @auth @goField(forceResolver: true)
+
+    #stats admin only
     CreateStat(stat: NewStat!): Any @auth @adminOnly @goField(forceResolver: true)
     CreateEvent(event: NewEvent!): Any @auth @adminOnly @goField(forceResolver: true)
+}
+
+input Pagination {
+    page: Int!
+    size: Int!
 }
 
 

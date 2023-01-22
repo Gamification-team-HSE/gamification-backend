@@ -3,6 +3,8 @@ package models
 import (
 	"database/sql"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type User struct {
@@ -12,7 +14,7 @@ type User struct {
 	CreatedAt time.Time      `db:"created_at"`
 	DeletedAt sql.NullTime   `db:"deleted_at"`
 	Role      Role           `db:"role" validate:"required"`
-	Name      sql.NullString `db:"name"`
+	Name      sql.NullString `db:"name" validate:"omitempty,max=256"`
 	Avatar    sql.NullString `db:"avatar"`
 }
 
@@ -23,3 +25,27 @@ const (
 	AdminRole      Role = "admin"
 	DefaultRole    Role = "user"
 )
+
+type UserFilter struct {
+	Active bool
+	Banned bool
+	Admins bool
+}
+
+type UsersTotalInfo struct {
+	Active int `db:"active"`
+	Banned int `db:"banned"`
+	Admins int `db:"admins"`
+}
+
+type GetUsersResponse struct {
+	Users []*User
+	Total *UsersTotalInfo
+}
+
+type UpdateUser struct {
+	ID     int    `validate:"required"`
+	Email  string `validate:"omitempty,email"`
+	Name   string `validate:"omitempty,max=256"`
+	Avatar *graphql.Upload
+}

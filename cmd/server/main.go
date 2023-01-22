@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"flag"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-playground/validator/v10"
 	"gitlab.com/krespix/gamification-api/internal/api/graphql/resolvers"
 	httpAPI "gitlab.com/krespix/gamification-api/internal/api/http"
+	"gitlab.com/krespix/gamification-api/internal/clients/s3"
 	"gitlab.com/krespix/gamification-api/internal/clients/smtp"
 	"gitlab.com/krespix/gamification-api/internal/config"
 	"gitlab.com/krespix/gamification-api/internal/core/app"
@@ -20,10 +23,10 @@ import (
 	userRepository "gitlab.com/krespix/gamification-api/internal/repositories/postgres/user"
 	authService "gitlab.com/krespix/gamification-api/internal/services/auth"
 	eventService "gitlab.com/krespix/gamification-api/internal/services/event"
+	imageService "gitlab.com/krespix/gamification-api/internal/services/image"
 	statService "gitlab.com/krespix/gamification-api/internal/services/stat"
 	userService "gitlab.com/krespix/gamification-api/internal/services/user"
 	"go.uber.org/zap"
-	"time"
 )
 
 const defaultConfigPath = "config/config.yaml"
@@ -70,6 +73,10 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	//init clients
 	smtpClient := smtp.New(cfg.SMTP)
 	cacheClient := cache.New(time.Minute*5, time.Minute*10)
+	s3Client, err := s3.New(cfg.S3)
+	if err != nil {
+		return nil, err
+	}
 
 	//init repositories
 	userRepo := userRepository.New(db)
@@ -78,12 +85,13 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	eventRepo := eventRepository.New(db)
 
 	//init services
-	userSrc := userService.New(userRepo, validate)
+	userSrc := userService.New(userRepo, validate, s3Client, cfg.Buckets.Users)
 	authSrc := authService.New(smtpClient, userRepo, authRepo, validate, cfg.Auth.JWTSecret, time.Hour*24)
 	statSrc := statService.New(statRepo, validate)
+	imageSrc := imageService.New(cfg.ImageService)
 	eventSrc := eventService.New(eventRepo, validate)
 
-	resolver := resolvers.New(userSrc, authSrc, statSrc, eventSrc)
+	resolver := resolvers.New(userSrc, authSrc, statSrc, imageSrc)
 	httpServer := httpAPI.New(resolver, authSrc, cfg.Auth.FakeAuthEnabled, cfg.HTTP.AllowedMethods, cfg.HTTP.AllowedHeaders, cfg.Auth.FakeAuthHeaders)
 
 	//init super admin

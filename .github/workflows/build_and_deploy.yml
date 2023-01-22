@@ -31,6 +31,8 @@ jobs:
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
             SUPER_ADMIN_EMAIL=${{ secrets.SUPER_ADMIN_EMAIL }}
+            S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}
+            S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }}
 
   migration:
     name: migrations
