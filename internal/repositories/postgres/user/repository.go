@@ -124,7 +124,7 @@ func (r *repository) List(ctx context.Context, pagination *models.RepoPagination
 	}
 	if filter != nil {
 		if filter.Active {
-			qb = qb.Where(sq.Expr("deleted_at is null"))
+			qb = qb.Where(sq.Expr("deleted_at is null and role=user"))
 		}
 		if filter.Banned {
 			qb = qb.Where(sq.Expr("deleted_at is not null"))
