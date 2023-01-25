@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres"
@@ -19,6 +20,10 @@ type Repository interface {
 	Create(ctx context.Context, event *models.Event) error
 	// ExistsByName проверяет существует ли событие по наименованию
 	ExistsByName(ctx context.Context, name string) (bool, error)
+	// Get получение события по id
+	Get(ctx context.Context, id int64) (*models.DbEvent, error)
+	// Update обновляет все поля, которые переданы в структуре
+	Update(ctx context.Context, id int64, event *models.UpdateEvent) error
 }
 
 type repository struct {
@@ -45,6 +50,13 @@ func (r *repository) ExistsByName(ctx context.Context, name string) (bool, error
 }
 
 func (r *repository) Create(ctx context.Context, event *models.Event) error {
+	img := sql.NullString{}
+	if event.Image != nil {
+		img = sql.NullString{
+			String: event.Image.Filename,
+			Valid:  true,
+		}
+	}
 	qb := utils.PgQB().Insert(eventsTableName).
 		Columns(
 			"name,"+
@@ -56,7 +68,7 @@ func (r *repository) Create(ctx context.Context, event *models.Event) error {
 		Values(
 			event.Name,
 			event.Description,
-			event.Image,
+			img,
 			time.Now(),
 			event.StartAt,
 			event.EndAt,
@@ -73,19 +85,53 @@ func (r *repository) Create(ctx context.Context, event *models.Event) error {
 	return nil
 }
 
-func (r *repository) UpdateImage(ctx context.Context, event *models.Event) error {
+func (r *repository) Update(ctx context.Context, id int64, event *models.UpdateEvent) error {
 	qb := utils.PgQB().Update(eventsTableName).
-		Set("image", event.Image).Where("id", event.ID)
+		Where(sq.Eq{"id": id})
+
+	if event != nil {
+		if event.Image != nil {
+			qb = qb.Set("image", event.Image.Filename)
+		}
+		if event.Name.Valid {
+			qb = qb.Set("name", event.Name)
+		}
+		if event.Description.Valid {
+			qb = qb.Set("description", event.Description.String)
+		}
+		if event.EndAt.Valid {
+			qb = qb.Set("end_at", event.EndAt.Time)
+		}
+
+		if event.StartAt.Valid {
+			qb = qb.Set("start_at", event.StartAt.Time)
+		}
+
+	}
 	query, args, err := qb.ToSql()
 	if err != nil {
 		return err
 	}
-	_, err = r.GetDBx().ExecContext(ctx, query, args...)
+	_, err = r.GetDBx().Exec(query, args...)
+	return err
+}
+
+func (r *repository) Get(ctx context.Context, id int64) (*models.DbEvent, error) {
+	qb := utils.PgQB().Select("*").
+		From(eventsTableName).
+		Where(sq.Eq{"id": id})
+	event := &models.DbEvent{}
+	query, args, err := qb.ToSql()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	err = r.GetDBx().GetContext(ctx, event, query, args...)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return event, nil
 }
 
 func New(client *postgres.Client) Repository {

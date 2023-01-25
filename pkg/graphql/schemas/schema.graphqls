@@ -29,6 +29,7 @@ type Mutation {
     #stats admin only
     CreateStat(stat: NewStat!): Any @auth @adminOnly @goField(forceResolver: true)
     CreateEvent(event: NewEvent!): Any @auth @adminOnly @goField(forceResolver: true)
+    UpdateEvent(event: UpdateEvent!) : Any @auth @adminOnly @goField(forceResolver: true)
 }
 
 input Pagination {

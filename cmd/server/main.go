@@ -89,7 +89,7 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	authSrc := authService.New(smtpClient, userRepo, authRepo, validate, cfg.Auth.JWTSecret, time.Hour*24)
 	statSrc := statService.New(statRepo, validate)
 	imageSrc := imageService.New(cfg.ImageService)
-	eventSrc := eventService.New(eventRepo, validate)
+	eventSrc := eventService.New(eventRepo, validate, s3Client, cfg.Buckets.Events)
 
 	resolver := resolvers.New(userSrc, authSrc, statSrc, imageSrc, eventSrc)
 	httpServer := httpAPI.New(resolver, authSrc, cfg.Auth.FakeAuthEnabled, cfg.HTTP.AllowedMethods, cfg.HTTP.AllowedHeaders, cfg.Auth.FakeAuthHeaders)

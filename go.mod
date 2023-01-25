@@ -3,7 +3,7 @@ module gitlab.com/krespix/gamification-api
 go 1.19
 
 require (
-	github.com/99designs/gqlgen v0.17.22
+	github.com/99designs/gqlgen v0.17.24
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/aws/aws-sdk-go v1.44.179
 	github.com/caarlos0/env/v6 v6.10.1

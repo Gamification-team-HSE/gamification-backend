@@ -11,19 +11,19 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
+type Event struct {
+	ID          int             `json:"id"`
+	Name        string          `json:"name"`
+	Description *string         `json:"description"`
+	Image       *graphql.Upload `json:"image"`
+	CreatedAt   time.Time       `json:"created_at"`
+	StartAt     time.Time       `json:"start_at"`
+	EndAt       *time.Time      `json:"end_at"`
+}
+
 type GetUsersResponse struct {
 	Users []*User         `json:"users"`
 	Total *UsersTotalInfo `json:"total"`
-}
-
-type Event struct {
-	ID          int        `json:"id"`
-	Name        string     `json:"name"`
-	Description *string    `json:"description"`
-	Image       *string    `json:"image"`
-	CreatedAt   time.Time  `json:"created_at"`
-	StartAt     time.Time  `json:"start_at"`
-	EndAt       *time.Time `json:"end_at"`
 }
 
 type NewEvent struct {
@@ -64,19 +64,20 @@ type Stat struct {
 	SeqPeriod   *string   `json:"seq_period"`
 }
 
-type UpdateUser struct {
-	ID     int             `json:"id"`
-	Email  *string         `json:"email"`
-	Avatar *graphql.Upload `json:"avatar"`
-	Name   *string         `json:"name"`
-}
-
 type UpdateEvent struct {
+	ID          int             `json:"id"`
 	Name        *string         `json:"name"`
 	Description *string         `json:"description"`
 	Image       *graphql.Upload `json:"image"`
 	StartAt     *time.Time      `json:"start_at"`
 	EndAt       *time.Time      `json:"end_at"`
+}
+
+type UpdateUser struct {
+	ID     int             `json:"id"`
+	Email  *string         `json:"email"`
+	Avatar *graphql.Upload `json:"avatar"`
+	Name   *string         `json:"name"`
 }
 
 type User struct {

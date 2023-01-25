@@ -4,7 +4,7 @@ type Event {
     id: Int!
     name: String!
     description: String
-    image: String
+    image: Upload
     created_at: Time!
     start_at: Time!
     end_at: Time
@@ -19,6 +19,7 @@ input NewEvent {
 }
 
 input UpdateEvent{
+    id: Int!
     name: String
     description: String
     image: Upload
