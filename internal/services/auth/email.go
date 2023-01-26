@@ -9,7 +9,7 @@ var emailTemplate string = `<!DOCTYPE html>
     <title>Document</title>
 </head>
 <body>
-    <table cellpadding="0" cellspacing="0" style="margin: 0; padding: 0px; max-width: 600px; width: 100%; border-collapse: collapse; border: none;">
+    <table cellpadding="0" cellspacing="0" style="margin: auto; padding: 0px; max-width: 600px; width: 100%; border-collapse: collapse; border: none;">
         <tbody>
             <tr class="header" style="max-width: 600px; width: 100%; position: relative; height: 168px; ">
                 <td class="icon" style="width: 128px; max-width: 128px; position: relative; left: 0; height: 128px;">
