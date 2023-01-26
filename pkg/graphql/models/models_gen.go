@@ -11,17 +11,35 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
+type Event struct {
+	ID          int             `json:"id"`
+	Name        string          `json:"name"`
+	Description *string         `json:"description"`
+	Image       *graphql.Upload `json:"image"`
+	CreatedAt   time.Time       `json:"created_at"`
+	StartAt     time.Time       `json:"start_at"`
+	EndAt       *time.Time      `json:"end_at"`
+}
+
 type GetUsersResponse struct {
 	Users []*User         `json:"users"`
 	Total *UsersTotalInfo `json:"total"`
 }
 
+type NewEvent struct {
+	Name        string          `json:"name"`
+	Description *string         `json:"description"`
+	Image       *graphql.Upload `json:"image"`
+	StartAt     time.Time       `json:"start_at"`
+	EndAt       *time.Time      `json:"end_at"`
+}
+
 type NewStat struct {
-	Name        string     `json:"name"`
-	Description *string    `json:"description"`
-	StartAt     *time.Time `json:"start_at"`
-	Period      *string    `json:"period"`
-	SeqPeriod   *string    `json:"seq_period"`
+	Name        string    `json:"name"`
+	Description *string   `json:"description"`
+	StartAt     time.Time `json:"start_at"`
+	Period      string    `json:"period"`
+	SeqPeriod   *string   `json:"seq_period"`
 }
 
 type NewUser struct {
@@ -44,6 +62,15 @@ type Stat struct {
 	StartAt     time.Time `json:"start_at"`
 	Period      string    `json:"period"`
 	SeqPeriod   *string   `json:"seq_period"`
+}
+
+type UpdateEvent struct {
+	ID          int             `json:"id"`
+	Name        *string         `json:"name"`
+	Description *string         `json:"description"`
+	Image       *graphql.Upload `json:"image"`
+	StartAt     *time.Time      `json:"start_at"`
+	EndAt       *time.Time      `json:"end_at"`
 }
 
 type UpdateUser struct {

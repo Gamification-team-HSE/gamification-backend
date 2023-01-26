@@ -18,9 +18,11 @@ import (
 	"gitlab.com/krespix/gamification-api/internal/repositories/cache"
 	authRepository "gitlab.com/krespix/gamification-api/internal/repositories/cache/auth"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres"
+	eventRepository "gitlab.com/krespix/gamification-api/internal/repositories/postgres/event"
 	statRepository "gitlab.com/krespix/gamification-api/internal/repositories/postgres/stat"
 	userRepository "gitlab.com/krespix/gamification-api/internal/repositories/postgres/user"
 	authService "gitlab.com/krespix/gamification-api/internal/services/auth"
+	eventService "gitlab.com/krespix/gamification-api/internal/services/event"
 	imageService "gitlab.com/krespix/gamification-api/internal/services/image"
 	statService "gitlab.com/krespix/gamification-api/internal/services/stat"
 	userService "gitlab.com/krespix/gamification-api/internal/services/user"
@@ -80,14 +82,16 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	userRepo := userRepository.New(db)
 	authRepo := authRepository.New(cacheClient)
 	statRepo := statRepository.New(db)
+	eventRepo := eventRepository.New(db)
 
 	//init services
 	userSrc := userService.New(userRepo, validate, s3Client, cfg.Buckets.Users)
 	authSrc := authService.New(smtpClient, userRepo, authRepo, validate, cfg.Auth.JWTSecret, time.Hour*24)
 	statSrc := statService.New(statRepo, validate)
 	imageSrc := imageService.New(cfg.ImageService)
+	eventSrc := eventService.New(eventRepo, validate, s3Client, cfg.Buckets.Events)
 
-	resolver := resolvers.New(userSrc, authSrc, statSrc, imageSrc)
+	resolver := resolvers.New(userSrc, authSrc, statSrc, imageSrc, eventSrc)
 	httpServer := httpAPI.New(resolver, authSrc, cfg.Auth.FakeAuthEnabled, cfg.HTTP.AllowedMethods, cfg.HTTP.AllowedHeaders, cfg.Auth.FakeAuthHeaders)
 
 	//init super admin

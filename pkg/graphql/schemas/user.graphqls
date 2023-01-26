@@ -1,5 +1,5 @@
 scalar Time
-scalar Upload
+
 
 type User {
     id: Int!
