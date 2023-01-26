@@ -1,16 +1,19 @@
 package auth
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"html/template"
+	"math/rand"
+	"time"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v4"
 	"gitlab.com/krespix/gamification-api/internal/clients/smtp"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	"gitlab.com/krespix/gamification-api/internal/repositories/cache/auth"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/user"
-	"math/rand"
-	"time"
 )
 
 // const for generate auth codes
@@ -25,6 +28,17 @@ type Service interface {
 	ValidateToken(ctx context.Context, token string) (*models.Claims, error)
 }
 
+type Code struct {
+	Code int
+}
+
+type Mail struct {
+	Sender  string
+	To      string
+	Subject string
+	Body    string
+}
+
 type service struct {
 	smtpClient smtp.Client
 
@@ -35,6 +49,16 @@ type service struct {
 
 	jwtSecret         string
 	defaultExpiration time.Duration
+}
+
+func buildMessage(mail Mail) string {
+	msg := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\r\n"
+	msg += fmt.Sprintf("From: %s\r\n", mail.Sender)
+	msg += fmt.Sprintf("To: %s\r\n", mail.To)
+	msg += fmt.Sprintf("Subject: %s\r\n", mail.Subject)
+	msg += fmt.Sprintf("\r\n%s\r\n", mail.Body)
+
+	return msg
 }
 
 func (s *service) SendCode(ctx context.Context, email string) error {
@@ -59,17 +83,28 @@ func (s *service) SendCode(ctx context.Context, email string) error {
 
 	code := generateCode()
 
-	text := fmt.Sprintf(
-		"From: gamification-noreply@mail.ru\r\nTo: %s\r\nSubject: Authorization code\r\n\r\nCode: %d \r\n",
-		email, code)
-	msg := []byte(text)
-
 	err = s.authRepo.CreateCode(ctx, email, code)
 	if err != nil {
 		return err
 	}
 
-	return s.smtpClient.Send(email, msg)
+	t := template.Must(template.New("template_data").Parse(emailTemplate))
+	var body bytes.Buffer
+	cd := Code{Code: code}
+	err = t.Execute(&body, cd)
+	if err != nil {
+		return err
+	}
+
+	mail := Mail{
+		Sender:  "gamification-noreply@mail.ru",
+		To:      email,
+		Subject: "Код авторизации",
+		Body:    body.String(),
+	}
+	res := buildMessage(mail)
+
+	return s.smtpClient.Send(email, []byte(res))
 }
 
 func (s *service) VerifyCode(ctx context.Context, email string, code int) (string, error) {
