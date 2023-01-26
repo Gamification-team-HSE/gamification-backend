@@ -22,6 +22,8 @@ type Repository interface {
 	ExistsByName(ctx context.Context, name string) (bool, error)
 	// Get получение события по id
 	Get(ctx context.Context, id int64) (*models.DbEvent, error)
+	// GetTime получение временных параметров по id
+	GetTime(ctx context.Context, id int64) (*models.EventTime, error)
 	// Update обновляет все поля, которые переданы в структуре
 	Update(ctx context.Context, id int64, event *models.UpdateEvent) error
 }
@@ -121,6 +123,24 @@ func (r *repository) Get(ctx context.Context, id int64) (*models.DbEvent, error)
 		From(eventsTableName).
 		Where(sq.Eq{"id": id})
 	event := &models.DbEvent{}
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.GetDBx().GetContext(ctx, event, query, args...)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return event, nil
+}
+
+func (r *repository) GetTime(ctx context.Context, id int64) (*models.EventTime, error) {
+	qb := utils.PgQB().Select("created_at, start_at, end_at").
+		From(eventsTableName).
+		Where(sq.Eq{"id": id})
+	event := &models.EventTime{}
 	query, args, err := qb.ToSql()
 	if err != nil {
 		return nil, err

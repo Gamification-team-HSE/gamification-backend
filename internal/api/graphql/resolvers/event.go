@@ -72,15 +72,10 @@ func stringToNullString(str *string) sql.NullString {
 }
 
 func (r *Resolver) UpdateEvent(ctx context.Context, event apiModels.UpdateEvent) (interface{}, error) {
-	claims, ok := utils.GetClaimsFromCtx(ctx)
+	_, ok := utils.GetClaimsFromCtx(ctx)
 	if !ok {
 		return nil, &gqlerror.Error{
 			Message: "access denied: no token in context",
-		}
-	}
-	if claims.Role == models.DefaultRole {
-		return nil, &gqlerror.Error{
-			Message: "access denied: user can update only self profile",
 		}
 	}
 
