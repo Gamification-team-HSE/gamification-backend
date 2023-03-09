@@ -56,7 +56,7 @@ func (r *repository) List(ctx context.Context, pagination *models.RepoPagination
 }
 
 func (r *repository) Total(ctx context.Context) (int, error) {
-	totalQuery := fmt.Sprintf("select count(*) from event")
+	totalQuery := "select count(*) from event"
 	var total int
 	err := r.GetDBx().GetContext(ctx, &total, totalQuery)
 	if err != nil {
