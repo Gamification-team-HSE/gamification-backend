@@ -3,18 +3,23 @@ package event
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/go-playground/validator/v10"
 	"gitlab.com/krespix/gamification-api/internal/clients/s3"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/event"
 	"gitlab.com/krespix/gamification-api/internal/services/image"
+	apiModels "gitlab.com/krespix/gamification-api/pkg/graphql/models"
+	"gitlab.com/krespix/gamification-api/pkg/utils"
 	errors "gitlab.com/krespix/gamification-api/pkg/utils/graphq_erorrs"
-	"time"
 )
 
 type Service interface {
 	Create(ctx context.Context, event *models.Event) error
 	Update(ctx context.Context, event *models.UpdateEvent) error
+	Get(ctx context.Context, id int) (*models.DbEvent, error)
+	List(ctx context.Context, pagination *models.Pagination) (*apiModels.GetEventsResponse, error)
 }
 type service struct {
 	validate  *validator.Validate
@@ -22,6 +27,46 @@ type service struct {
 
 	folder   string
 	s3Client s3.Client
+}
+
+func (s *service) List(ctx context.Context, pagination *models.Pagination) (*apiModels.GetEventsResponse, error) {
+	var repoPagination *models.RepoPagination
+	if pagination != nil {
+		repoPagination = pagination.ToRepo()
+	}
+	events, err := s.eventRepo.List(ctx, repoPagination)
+	if err != nil {
+		return nil, err
+	}
+	total, err := s.eventRepo.Total(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resEvents := make([]*apiModels.GetEvent, 0, len(events))
+	for _, e := range events {
+		resEvents = append(resEvents, &apiModels.GetEvent{
+			ID:          int(e.ID),
+			Name:        e.Name,
+			Description: utils.SqlNullStringToString(e.Description),
+			Image:       utils.SqlNullStringToString(e.Image),
+			CreatedAt:   e.CreatedAt,
+			StartAt:     e.StartAt,
+			EndAt:       utils.SqlNullTimeToTime(e.EndAt),
+		})
+	}
+
+	return &apiModels.GetEventsResponse{
+		Total:  total,
+		Events: resEvents,
+	}, nil
+}
+
+func (s *service) Get(ctx context.Context, id int) (*models.DbEvent, error) {
+	e, err := s.eventRepo.Get(ctx, int64(id))
+	if err != nil {
+		return nil, err
+	}
+	return e, nil
 }
 
 func (s *service) Create(ctx context.Context, event *models.Event) error {
@@ -69,15 +114,14 @@ func (s *service) Update(ctx context.Context, event *models.UpdateEvent) error {
 	}
 	updateEventReq := &models.UpdateEvent{ID: int64(event.ID)}
 
-	//TODO run upload in goroutine
 	if event.Image != nil {
 		oldEvent, err := s.eventRepo.Get(ctx, int64(event.ID))
 		if err != nil {
 			fmt.Println("Тут")
 			return errors.InternalServerErrorWithDesc(ctx, err)
 		}
-		if oldEvent.Image != "" {
-			err = s.s3Client.Delete(s.folder, oldEvent.Image)
+		if oldEvent.Image.String != "" {
+			err = s.s3Client.Delete(s.folder, oldEvent.Image.String)
 			if err != nil {
 				return errors.InternalServerErrorWithDesc(ctx, err)
 			}

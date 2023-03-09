@@ -4,13 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
+
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	"gitlab.com/krespix/gamification-api/internal/services/image"
 	apiModels "gitlab.com/krespix/gamification-api/pkg/graphql/models"
 	"gitlab.com/krespix/gamification-api/pkg/utils"
 	errors "gitlab.com/krespix/gamification-api/pkg/utils/graphq_erorrs"
-	"time"
 )
 
 func (r *Resolver) CreateEvent(ctx context.Context, event apiModels.NewEvent) (interface{}, error) {
@@ -102,4 +103,37 @@ func (r *Resolver) UpdateEvent(ctx context.Context, event apiModels.UpdateEvent)
 	return map[string]interface{}{
 		"status": "success",
 	}, nil
+}
+
+func (r *Resolver) GetEvent(ctx context.Context, id int) (*apiModels.GetEvent, error) {
+	event, err := r.eventService.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &apiModels.GetEvent{
+		ID:          int(event.ID),
+		Name:        event.Name,
+		Description: utils.SqlNullStringToString(event.Description),
+		Image:       utils.SqlNullStringToString(event.Image),
+		CreatedAt:   event.CreatedAt,
+		StartAt:     event.StartAt,
+		EndAt:       utils.SqlNullTimeToTime(event.EndAt),
+	}, nil
+}
+
+func (r *Resolver) GetEvents(ctx context.Context, pagination *apiModels.Pagination) (*apiModels.GetEventsResponse, error) {
+	var (
+		mPagination *models.Pagination
+	)
+	if pagination != nil {
+		mPagination = &models.Pagination{
+			Page: pagination.Page,
+			Size: pagination.Size,
+		}
+	}
+	res, err := r.eventService.List(ctx, mPagination)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }

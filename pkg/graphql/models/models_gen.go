@@ -21,6 +21,21 @@ type Event struct {
 	EndAt       *time.Time      `json:"end_at"`
 }
 
+type GetEvent struct {
+	ID          int        `json:"id"`
+	Name        string     `json:"name"`
+	Description *string    `json:"description"`
+	Image       *string    `json:"image"`
+	CreatedAt   time.Time  `json:"created_at"`
+	StartAt     time.Time  `json:"start_at"`
+	EndAt       *time.Time `json:"end_at"`
+}
+
+type GetEventsResponse struct {
+	Total  int         `json:"total"`
+	Events []*GetEvent `json:"events"`
+}
+
 type GetUsersResponse struct {
 	Users []*User         `json:"users"`
 	Total *UsersTotalInfo `json:"total"`

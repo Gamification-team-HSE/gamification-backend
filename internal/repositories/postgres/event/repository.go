@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
+
 	sq "github.com/Masterminds/squirrel"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres"
 	"gitlab.com/krespix/gamification-api/pkg/utils"
-	"time"
 )
 
 const (
@@ -26,10 +27,42 @@ type Repository interface {
 	GetTime(ctx context.Context, id int64) (*models.EventTime, error)
 	// Update обновляет все поля, которые переданы в структуре
 	Update(ctx context.Context, id int64, event *models.UpdateEvent) error
+	List(ctx context.Context, pagination *models.RepoPagination) ([]*models.DbEvent, error)
+	Total(ctx context.Context) (int, error)
 }
 
 type repository struct {
 	*postgres.Client
+}
+
+func (r *repository) List(ctx context.Context, pagination *models.RepoPagination) ([]*models.DbEvent, error) {
+	qb := utils.PgQB().Select("*").
+		From(eventsTableName).
+		OrderBy("created_at")
+	if pagination != nil {
+		qb = qb.Limit(uint64(pagination.Limit))
+		qb = qb.Offset(uint64(pagination.Offset))
+	}
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return nil, err
+	}
+	var res []*models.DbEvent
+	err = r.GetDBx().SelectContext(ctx, &res, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (r *repository) Total(ctx context.Context) (int, error) {
+	totalQuery := fmt.Sprintf("select count(*) from event")
+	var total int
+	err := r.GetDBx().GetContext(ctx, &total, totalQuery)
+	if err != nil {
+		return 0, err
+	}
+	return total, nil
 }
 
 func (r *repository) ExistsByName(ctx context.Context, name string) (bool, error) {
