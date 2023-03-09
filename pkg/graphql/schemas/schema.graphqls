@@ -10,6 +10,10 @@ type Query {
     GetUser(id: Int!): User! @auth @goField(forceResolver: true)
     GetCurrentUser: User! @auth @goField(forceResolver: true)
     GetUsers(pagination: Pagination, filter: UserFilter): GetUsersResponse! @auth @goField(forceResolver: true)
+
+    #events common
+    GetEvent(id: Int!): GetEvent! @auth @goField(forceResolver: true)
+    GetEvents(pagination: Pagination): GetEventsResponse! @auth @goField(forceResolver: true)
 }
 
 type Mutation {
@@ -28,8 +32,10 @@ type Mutation {
 
     #stats admin only
     CreateStat(stat: NewStat!): Any @auth @adminOnly @goField(forceResolver: true)
-    CreateEvent(event: NewEvent!): Any @auth @adminOnly @goField(forceResolver: true)
+
+    #events admin only
     UpdateEvent(event: UpdateEvent!) : Any @auth @adminOnly @goField(forceResolver: true)
+    CreateEvent(event: NewEvent!): Any @auth @adminOnly @goField(forceResolver: true)
 }
 
 input Pagination {

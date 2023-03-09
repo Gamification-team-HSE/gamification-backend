@@ -26,3 +26,18 @@ input UpdateEvent{
     start_at: Time
     end_at: Time
 }
+
+type GetEvent {
+    id: Int!
+    name: String!
+    description: String
+    image: String
+    created_at: Time!
+    start_at: Time!
+    end_at: Time
+}
+
+type GetEventsResponse {
+    total: Int!
+    events: [GetEvent!]!
+}

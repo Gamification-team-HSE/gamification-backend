@@ -2,8 +2,9 @@ package models
 
 import (
 	"database/sql"
-	"github.com/99designs/gqlgen/graphql"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 // DbEvent Select из базы возвращает событие в текущей структуре
@@ -11,7 +12,7 @@ type DbEvent struct {
 	ID          int64          `db:"id"`
 	Name        string         `db:"name" validate:"lte=128"`
 	Description sql.NullString `db:"description"`
-	Image       string         `db:"image"`
+	Image       sql.NullString `db:"image"`
 	CreatedAt   time.Time      `db:"created_at"`
 	StartAt     time.Time      `db:"start_at" validate:"required"`
 	EndAt       sql.NullTime   `db:"end_at"`
