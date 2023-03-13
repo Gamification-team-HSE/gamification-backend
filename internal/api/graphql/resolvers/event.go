@@ -137,3 +137,8 @@ func (r *Resolver) GetEvents(ctx context.Context, pagination *apiModels.Paginati
 	}
 	return res, nil
 }
+
+func (r *Resolver) DeleteEvent(ctx context.Context, id int) (interface{}, error) {
+	err := r.eventService.Delete(ctx, id)
+	return nil, err
+}

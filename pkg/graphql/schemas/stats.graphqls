@@ -16,3 +16,17 @@ input NewStat {
     seq_period: String
 }
 
+type GetStatsResponse {
+    total: Int!
+    stats: [Stat!]!
+}
+
+input UpdateStat {
+    id: Int!
+    name: String
+    description: String
+    start_at: Time
+    period: String
+    seq_period: String
+}
+

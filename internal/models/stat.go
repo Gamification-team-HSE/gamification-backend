@@ -14,3 +14,17 @@ type Stat struct {
 	Period      string         `db:"period"`
 	SeqPeriod   sql.NullString `db:"seq_period"`
 }
+
+type GetStatsResponse struct {
+	Stats []*Stat
+	Total int
+}
+
+type UpdateStat struct {
+	ID          int
+	Name        string
+	Description string
+	StartedAt   time.Time
+	Period      string
+	SeqPeriod   string
+}

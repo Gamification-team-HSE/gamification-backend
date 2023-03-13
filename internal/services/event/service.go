@@ -20,6 +20,7 @@ type Service interface {
 	Update(ctx context.Context, event *models.UpdateEvent) error
 	Get(ctx context.Context, id int) (*models.DbEvent, error)
 	List(ctx context.Context, pagination *models.Pagination) (*apiModels.GetEventsResponse, error)
+	Delete(ctx context.Context, id int) error
 }
 type service struct {
 	validate  *validator.Validate
@@ -27,6 +28,11 @@ type service struct {
 
 	folder   string
 	s3Client s3.Client
+}
+
+func (s *service) Delete(ctx context.Context, id int) error {
+	err := s.eventRepo.Delete(ctx, id)
+	return err
 }
 
 func (s *service) List(ctx context.Context, pagination *models.Pagination) (*apiModels.GetEventsResponse, error) {

@@ -36,6 +36,11 @@ type GetEventsResponse struct {
 	Events []*GetEvent `json:"events"`
 }
 
+type GetStatsResponse struct {
+	Total int     `json:"total"`
+	Stats []*Stat `json:"stats"`
+}
+
 type GetUsersResponse struct {
 	Users []*User         `json:"users"`
 	Total *UsersTotalInfo `json:"total"`
@@ -86,6 +91,15 @@ type UpdateEvent struct {
 	Image       *graphql.Upload `json:"image"`
 	StartAt     *time.Time      `json:"start_at"`
 	EndAt       *time.Time      `json:"end_at"`
+}
+
+type UpdateStat struct {
+	ID          int        `json:"id"`
+	Name        *string    `json:"name"`
+	Description *string    `json:"description"`
+	StartAt     *time.Time `json:"start_at"`
+	Period      *string    `json:"period"`
+	SeqPeriod   *string    `json:"seq_period"`
 }
 
 type UpdateUser struct {

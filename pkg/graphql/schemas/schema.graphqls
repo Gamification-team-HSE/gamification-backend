@@ -11,9 +11,20 @@ type Query {
     GetCurrentUser: User! @auth @goField(forceResolver: true)
     GetUsers(pagination: Pagination, filter: UserFilter): GetUsersResponse! @auth @goField(forceResolver: true)
 
+    #full user with stats + achiev + events
+
+    #rating - sort achiv count | value stat (мб две ручки)
+
+    #достижения - круды
+
+
     #events common
     GetEvent(id: Int!): GetEvent! @auth @goField(forceResolver: true)
     GetEvents(pagination: Pagination): GetEventsResponse! @auth @goField(forceResolver: true)
+
+    #stats common
+    GetStat(id: Int!): Stat! @auth @goField(forceResolver: true)
+    GetStats(pagination: Pagination): GetStatsResponse! @auth @goField(forceResolver: true)
 }
 
 type Mutation {
@@ -32,10 +43,13 @@ type Mutation {
 
     #stats admin only
     CreateStat(stat: NewStat!): Any @auth @adminOnly @goField(forceResolver: true)
+    UpdateStat(stat: UpdateStat!): Any @auth @adminOnly @goField(forceResolver: true)
+    DeleteStat(id: Int!): Any @auth @adminOnly @goField(forceResolver: true)
 
     #events admin only
     UpdateEvent(event: UpdateEvent!) : Any @auth @adminOnly @goField(forceResolver: true)
     CreateEvent(event: NewEvent!): Any @auth @adminOnly @goField(forceResolver: true)
+    DeleteEvent(id: Int!): Any @auth @adminOnly @goField(forceResolver: true)
 }
 
 input Pagination {

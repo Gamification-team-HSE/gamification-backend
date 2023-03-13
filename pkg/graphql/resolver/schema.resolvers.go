@@ -52,6 +52,16 @@ func (r *mutationResolver) CreateStat(ctx context.Context, stat models.NewStat) 
 	panic(fmt.Errorf("not implemented: CreateStat - CreateStat"))
 }
 
+// UpdateStat is the resolver for the UpdateStat field.
+func (r *mutationResolver) UpdateStat(ctx context.Context, stat models.UpdateStat) (interface{}, error) {
+	panic(fmt.Errorf("not implemented: UpdateStat - UpdateStat"))
+}
+
+// DeleteStat is the resolver for the DeleteStat field.
+func (r *mutationResolver) DeleteStat(ctx context.Context, id int) (interface{}, error) {
+	panic(fmt.Errorf("not implemented: DeleteStat - DeleteStat"))
+}
+
 // UpdateEvent is the resolver for the UpdateEvent field.
 func (r *mutationResolver) UpdateEvent(ctx context.Context, event models.UpdateEvent) (interface{}, error) {
 	panic(fmt.Errorf("not implemented: UpdateEvent - UpdateEvent"))
@@ -60,6 +70,11 @@ func (r *mutationResolver) UpdateEvent(ctx context.Context, event models.UpdateE
 // CreateEvent is the resolver for the CreateEvent field.
 func (r *mutationResolver) CreateEvent(ctx context.Context, event models.NewEvent) (interface{}, error) {
 	panic(fmt.Errorf("not implemented: CreateEvent - CreateEvent"))
+}
+
+// DeleteEvent is the resolver for the DeleteEvent field.
+func (r *mutationResolver) DeleteEvent(ctx context.Context, id int) (interface{}, error) {
+	panic(fmt.Errorf("not implemented: DeleteEvent - DeleteEvent"))
 }
 
 // GetUser is the resolver for the GetUser field.
@@ -85,6 +100,16 @@ func (r *queryResolver) GetEvent(ctx context.Context, id int) (*models.GetEvent,
 // GetEvents is the resolver for the GetEvents field.
 func (r *queryResolver) GetEvents(ctx context.Context, pagination *models.Pagination) (*models.GetEventsResponse, error) {
 	panic(fmt.Errorf("not implemented: GetEvents - GetEvents"))
+}
+
+// GetStat is the resolver for the GetStat field.
+func (r *queryResolver) GetStat(ctx context.Context, id int) (*models.Stat, error) {
+	panic(fmt.Errorf("not implemented: GetStat - GetStat"))
+}
+
+// GetStats is the resolver for the GetStats field.
+func (r *queryResolver) GetStats(ctx context.Context, pagination *models.Pagination) (*models.GetStatsResponse, error) {
+	panic(fmt.Errorf("not implemented: GetStats - GetStats"))
 }
 
 // Mutation returns server.MutationResolver implementation.
