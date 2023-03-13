@@ -29,10 +29,23 @@ type Repository interface {
 	Update(ctx context.Context, id int64, event *models.UpdateEvent) error
 	List(ctx context.Context, pagination *models.RepoPagination) ([]*models.DbEvent, error)
 	Total(ctx context.Context) (int, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type repository struct {
 	*postgres.Client
+}
+
+func (r *repository) Delete(ctx context.Context, id int) error {
+	qb := utils.PgQB().
+		Delete(eventsTableName).
+		Where(sq.Eq{"id": id})
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = r.GetDBx().ExecContext(ctx, query, args...)
+	return err
 }
 
 func (r *repository) List(ctx context.Context, pagination *models.RepoPagination) ([]*models.DbEvent, error) {

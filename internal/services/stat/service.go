@@ -3,6 +3,7 @@ package stat
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-playground/validator/v10"
 	"gitlab.com/krespix/gamification-api/internal/models"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/stat"
@@ -10,10 +11,37 @@ import (
 
 type Service interface {
 	Create(ctx context.Context, user *models.Stat) error
+	Delete(ctx context.Context, id int) error
+	Get(ctx context.Context, id int) (*models.Stat, error)
+	List(ctx context.Context, pagination *models.Pagination) (*models.GetStatsResponse, error)
+	Update(ctx context.Context, updateStat *models.UpdateStat) error
 }
 type service struct {
 	validate *validator.Validate
 	statRepo stat.Repository
+}
+
+func (s *service) Update(ctx context.Context, updateStat *models.UpdateStat) error {
+	return s.statRepo.Update(ctx, updateStat)
+}
+
+func (s *service) List(ctx context.Context, pagination *models.Pagination) (*models.GetStatsResponse, error) {
+	total, err := s.statRepo.Total(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var repoPagination *models.RepoPagination
+	if pagination != nil {
+		repoPagination = pagination.ToRepo()
+	}
+	stats, err := s.statRepo.List(ctx, repoPagination)
+	if err != nil {
+		return nil, err
+	}
+	return &models.GetStatsResponse{
+		Stats: stats,
+		Total: total,
+	}, nil
 }
 
 func (s *service) Create(ctx context.Context, stat *models.Stat) error {
@@ -29,6 +57,14 @@ func (s *service) Create(ctx context.Context, stat *models.Stat) error {
 		return fmt.Errorf("stat with name %s already exists", stat.Name)
 	}
 	return s.statRepo.Create(ctx, stat)
+}
+
+func (s *service) Delete(ctx context.Context, id int) error {
+	return s.statRepo.Delete(ctx, id)
+}
+
+func (s *service) Get(ctx context.Context, id int) (*models.Stat, error) {
+	return s.statRepo.Get(ctx, id)
 }
 
 func New(
