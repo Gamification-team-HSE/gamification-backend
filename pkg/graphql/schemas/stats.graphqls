@@ -2,8 +2,8 @@ type Stat {
     id: Int!
     name: String!
     description: String
-    created_at: Time!
-    start_at: Time!
+    created_at: Int!
+    start_at: Int!
     period: String!
     seq_period: String
 }
@@ -11,7 +11,7 @@ type Stat {
 input NewStat {
     name: String!
     description: String
-    start_at: Time!
+    start_at: Int!
     period: String!
     seq_period: String
 }
@@ -25,7 +25,7 @@ input UpdateStat {
     id: Int!
     name: String
     description: String
-    start_at: Time
+    start_at: Int
     period: String
     seq_period: String
 }

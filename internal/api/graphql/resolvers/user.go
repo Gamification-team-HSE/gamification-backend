@@ -178,15 +178,18 @@ func (r *Resolver) GetCurrentUser(ctx context.Context) (*apiModels.User, error) 
 }
 
 func modelsUserToAPI(user *models.User) *apiModels.User {
+	deletedAt := utils.SqlNullTimeToTime(user.DeletedAt)
 	usr := &apiModels.User{
 		ID:        int(user.ID),
 		ForeignID: utils.SqlNullStringToString(user.ForeignID),
 		Email:     user.Email,
-		CreatedAt: user.CreatedAt,
-		DeletedAt: utils.SqlNullTimeToTime(user.DeletedAt),
+		CreatedAt: int(user.CreatedAt.Unix()),
 		Role:      apiModels.Role(user.Role),
 		Name:      utils.SqlNullStringToString(user.Name),
 		Avatar:    utils.SqlNullStringToString(user.Avatar),
+	}
+	if deletedAt != 0 {
+		usr.DeletedAt = &deletedAt
 	}
 	return usr
 }

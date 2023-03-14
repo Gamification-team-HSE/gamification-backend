@@ -5,17 +5,17 @@ type Event {
     name: String!
     description: String
     image: Upload
-    created_at: Time!
-    start_at: Time!
-    end_at: Time
+    created_at: Int!
+    start_at: Int!
+    end_at: Int
 }
 
 input NewEvent {
     name: String!
     description: String
     image: Upload
-    start_at: Time!
-    end_at: Time
+    start_at: Int!
+    end_at: Int
 }
 
 input UpdateEvent{
@@ -23,8 +23,8 @@ input UpdateEvent{
     name: String
     description: String
     image: Upload
-    start_at: Time
-    end_at: Time
+    start_at: Int
+    end_at: Int
 }
 
 type GetEvent {
@@ -32,9 +32,9 @@ type GetEvent {
     name: String!
     description: String
     image: String
-    created_at: Time!
-    start_at: Time!
-    end_at: Time
+    created_at: Int!
+    start_at: Int!
+    end_at: Int
 }
 
 type GetEventsResponse {

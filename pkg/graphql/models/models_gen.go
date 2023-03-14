@@ -21,14 +21,22 @@ type Achievement struct {
 	CreatedAt   time.Time  `json:"created_at"`
 }
 
+type CreateAchievement struct {
+	Name        string          `json:"name"`
+	Description *string         `json:"description"`
+	Image       *graphql.Upload `json:"image"`
+	Rules       *InputRules     `json:"rules"`
+	EndAt       *time.Time      `json:"end_at"`
+}
+
 type Event struct {
 	ID          int             `json:"id"`
 	Name        string          `json:"name"`
 	Description *string         `json:"description"`
 	Image       *graphql.Upload `json:"image"`
-	CreatedAt   time.Time       `json:"created_at"`
-	StartAt     time.Time       `json:"start_at"`
-	EndAt       *time.Time      `json:"end_at"`
+	CreatedAt   int             `json:"created_at"`
+	StartAt     int             `json:"start_at"`
+	EndAt       *int            `json:"end_at"`
 }
 
 type EventRule struct {
@@ -36,14 +44,19 @@ type EventRule struct {
 	NeedParticipate bool `json:"need_participate"`
 }
 
+type GetAchievementsResponse struct {
+	Total        int            `json:"total"`
+	Achievements []*Achievement `json:"achievements"`
+}
+
 type GetEvent struct {
-	ID          int        `json:"id"`
-	Name        string     `json:"name"`
-	Description *string    `json:"description"`
-	Image       *string    `json:"image"`
-	CreatedAt   time.Time  `json:"created_at"`
-	StartAt     time.Time  `json:"start_at"`
-	EndAt       *time.Time `json:"end_at"`
+	ID          int     `json:"id"`
+	Name        string  `json:"name"`
+	Description *string `json:"description"`
+	Image       *string `json:"image"`
+	CreatedAt   int     `json:"created_at"`
+	StartAt     int     `json:"start_at"`
+	EndAt       *int    `json:"end_at"`
 }
 
 type GetEventsResponse struct {
@@ -61,20 +74,41 @@ type GetUsersResponse struct {
 	Total *UsersTotalInfo `json:"total"`
 }
 
+type InputEventRule struct {
+	EventID         int  `json:"event_id"`
+	NeedParticipate bool `json:"need_participate"`
+}
+
+type InputRuleBlock struct {
+	EventsRules        []*InputStatRule    `json:"eventsRules"`
+	StatRules          []*InputRuleBlock   `json:"statRules"`
+	ConnectionOperator *ConnectionOperator `json:"connection_operator"`
+}
+
+type InputRules struct {
+	Blocks []*InputRuleBlock `json:"blocks"`
+}
+
+type InputStatRule struct {
+	StatID         int        `json:"stat_id"`
+	TargetValue    int        `json:"target_value"`
+	ComparisonType Comparison `json:"comparison_type"`
+}
+
 type NewEvent struct {
 	Name        string          `json:"name"`
 	Description *string         `json:"description"`
 	Image       *graphql.Upload `json:"image"`
-	StartAt     time.Time       `json:"start_at"`
-	EndAt       *time.Time      `json:"end_at"`
+	StartAt     int             `json:"start_at"`
+	EndAt       *int            `json:"end_at"`
 }
 
 type NewStat struct {
-	Name        string    `json:"name"`
-	Description *string   `json:"description"`
-	StartAt     time.Time `json:"start_at"`
-	Period      string    `json:"period"`
-	SeqPeriod   *string   `json:"seq_period"`
+	Name        string  `json:"name"`
+	Description *string `json:"description"`
+	StartAt     int     `json:"start_at"`
+	Period      string  `json:"period"`
+	SeqPeriod   *string `json:"seq_period"`
 }
 
 type NewUser struct {
@@ -100,13 +134,13 @@ type Rules struct {
 }
 
 type Stat struct {
-	ID          int       `json:"id"`
-	Name        string    `json:"name"`
-	Description *string   `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
-	StartAt     time.Time `json:"start_at"`
-	Period      string    `json:"period"`
-	SeqPeriod   *string   `json:"seq_period"`
+	ID          int     `json:"id"`
+	Name        string  `json:"name"`
+	Description *string `json:"description"`
+	CreatedAt   int     `json:"created_at"`
+	StartAt     int     `json:"start_at"`
+	Period      string  `json:"period"`
+	SeqPeriod   *string `json:"seq_period"`
 }
 
 type StatRule struct {
@@ -115,22 +149,30 @@ type StatRule struct {
 	ComparisonType Comparison `json:"comparison_type"`
 }
 
+type UpdateAchievement struct {
+	ID    int             `json:"id"`
+	Name  *string         `json:"name"`
+	Image *graphql.Upload `json:"image"`
+	Rules *InputRules     `json:"rules"`
+	EndAt *time.Time      `json:"end_at"`
+}
+
 type UpdateEvent struct {
 	ID          int             `json:"id"`
 	Name        *string         `json:"name"`
 	Description *string         `json:"description"`
 	Image       *graphql.Upload `json:"image"`
-	StartAt     *time.Time      `json:"start_at"`
-	EndAt       *time.Time      `json:"end_at"`
+	StartAt     *int            `json:"start_at"`
+	EndAt       *int            `json:"end_at"`
 }
 
 type UpdateStat struct {
-	ID          int        `json:"id"`
-	Name        *string    `json:"name"`
-	Description *string    `json:"description"`
-	StartAt     *time.Time `json:"start_at"`
-	Period      *string    `json:"period"`
-	SeqPeriod   *string    `json:"seq_period"`
+	ID          int     `json:"id"`
+	Name        *string `json:"name"`
+	Description *string `json:"description"`
+	StartAt     *int    `json:"start_at"`
+	Period      *string `json:"period"`
+	SeqPeriod   *string `json:"seq_period"`
 }
 
 type UpdateUser struct {
@@ -141,14 +183,14 @@ type UpdateUser struct {
 }
 
 type User struct {
-	ID        int        `json:"id"`
-	ForeignID *string    `json:"foreign_id"`
-	Email     string     `json:"email"`
-	CreatedAt time.Time  `json:"created_at"`
-	DeletedAt *time.Time `json:"deleted_at"`
-	Role      Role       `json:"role"`
-	Avatar    *string    `json:"avatar"`
-	Name      *string    `json:"name"`
+	ID        int     `json:"id"`
+	ForeignID *string `json:"foreign_id"`
+	Email     string  `json:"email"`
+	CreatedAt int     `json:"created_at"`
+	DeletedAt *int    `json:"deleted_at"`
+	Role      Role    `json:"role"`
+	Avatar    *string `json:"avatar"`
+	Name      *string `json:"name"`
 }
 
 type UserFilter struct {

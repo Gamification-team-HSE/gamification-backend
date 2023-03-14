@@ -42,3 +42,45 @@ enum Comparison {
     NotEquals
     LesserThan
 }
+
+type GetAchievementsResponse {
+    total: Int!
+    achievements: [Achievement!]!
+}
+
+input CreateAchievement {
+    name: String!
+    description: String
+    image: Upload
+    rules: InputRules!
+    end_at: Time
+}
+
+input UpdateAchievement {
+    id: Int!
+    name: String
+    image: Upload
+    rules: InputRules
+    end_at: Time
+}
+
+input InputRules {
+    blocks: [InputRuleBlock!]!
+}
+
+input InputRuleBlock {
+    eventsRules: [InputStatRule!]
+    statRules: [InputRuleBlock!]
+    connection_operator: ConnectionOperator
+}
+
+input InputEventRule {
+    event_id: Int!
+    need_participate: Boolean!
+}
+
+input InputStatRule {
+    stat_id: Int!
+    target_value: Int!
+    comparison_type: Comparison!
+}

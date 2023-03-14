@@ -15,8 +15,9 @@ type Query {
 
     #rating - sort achiv count | value stat (мб две ручки)
 
-    #достижения - круды
-
+    #achievements common
+    GetAchievement(id: Int!): Achievement @auth @goField(forceResolver: true)
+    GetAchievements(pagination: Pagination): GetAchievementsResponse @auth @goField(forceResolver: true)
 
     #events common
     GetEvent(id: Int!): GetEvent! @auth @goField(forceResolver: true)
@@ -49,7 +50,12 @@ type Mutation {
     #events admin only
     UpdateEvent(event: UpdateEvent!) : Any @auth @adminOnly @goField(forceResolver: true)
     CreateEvent(event: NewEvent!): Any @auth @adminOnly @goField(forceResolver: true)
-    DeleteEvent(id: Int!): Any @auth @adminOnly @goField(forceResolver: true)
+    DeleteEvent(id: Int!): Any
+
+    #achievements admin only
+    DeleteAchievement(id: Int!): Any @auth @adminOnly @goField(forceResolver: true)
+    CreateAchievement(achievement: CreateAchievement!): Any @auth @adminOnly @goField(forceResolver: true)
+    UpdateAchievement(achievement: UpdateAchievement!): Any @auth @adminOnly @goField(forceResolver: true)
 }
 
 input Pagination {

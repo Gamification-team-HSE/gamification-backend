@@ -77,6 +77,21 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, id int) (interface{}
 	panic(fmt.Errorf("not implemented: DeleteEvent - DeleteEvent"))
 }
 
+// DeleteAchievement is the resolver for the DeleteAchievement field.
+func (r *mutationResolver) DeleteAchievement(ctx context.Context, id int) (interface{}, error) {
+	panic(fmt.Errorf("not implemented: DeleteAchievement - DeleteAchievement"))
+}
+
+// CreateAchievement is the resolver for the CreateAchievement field.
+func (r *mutationResolver) CreateAchievement(ctx context.Context, achievement models.CreateAchievement) (interface{}, error) {
+	panic(fmt.Errorf("not implemented: CreateAchievement - CreateAchievement"))
+}
+
+// UpdateAchievement is the resolver for the UpdateAchievement field.
+func (r *mutationResolver) UpdateAchievement(ctx context.Context, achievement models.UpdateAchievement) (interface{}, error) {
+	panic(fmt.Errorf("not implemented: UpdateAchievement - UpdateAchievement"))
+}
+
 // GetUser is the resolver for the GetUser field.
 func (r *queryResolver) GetUser(ctx context.Context, id int) (*models.User, error) {
 	panic(fmt.Errorf("not implemented: GetUser - GetUser"))
@@ -90,6 +105,16 @@ func (r *queryResolver) GetCurrentUser(ctx context.Context) (*models.User, error
 // GetUsers is the resolver for the GetUsers field.
 func (r *queryResolver) GetUsers(ctx context.Context, pagination *models.Pagination, filter *models.UserFilter) (*models.GetUsersResponse, error) {
 	panic(fmt.Errorf("not implemented: GetUsers - GetUsers"))
+}
+
+// GetAchievement is the resolver for the GetAchievement field.
+func (r *queryResolver) GetAchievement(ctx context.Context, id int) (*models.Achievement, error) {
+	panic(fmt.Errorf("not implemented: GetAchievement - GetAchievement"))
+}
+
+// GetAchievements is the resolver for the GetAchievements field.
+func (r *queryResolver) GetAchievements(ctx context.Context, pagination *models.Pagination) (*models.GetAchievementsResponse, error) {
+	panic(fmt.Errorf("not implemented: GetAchievements - GetAchievements"))
 }
 
 // GetEvent is the resolver for the GetEvent field.

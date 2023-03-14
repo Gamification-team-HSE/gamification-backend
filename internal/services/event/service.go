@@ -50,15 +50,19 @@ func (s *service) List(ctx context.Context, pagination *models.Pagination) (*api
 	}
 	resEvents := make([]*apiModels.GetEvent, 0, len(events))
 	for _, e := range events {
-		resEvents = append(resEvents, &apiModels.GetEvent{
+		ev := &apiModels.GetEvent{
 			ID:          int(e.ID),
 			Name:        e.Name,
 			Description: utils.SqlNullStringToString(e.Description),
 			Image:       utils.SqlNullStringToString(e.Image),
-			CreatedAt:   e.CreatedAt,
-			StartAt:     e.StartAt,
-			EndAt:       utils.SqlNullTimeToTime(e.EndAt),
-		})
+			CreatedAt:   int(e.CreatedAt.Unix()),
+			StartAt:     int(e.StartAt.Unix()),
+		}
+		endAt := utils.SqlNullTimeToTime(e.EndAt)
+		if endAt != 0 {
+			ev.EndAt = &endAt
+		}
+		resEvents = append(resEvents, ev)
 	}
 
 	return &apiModels.GetEventsResponse{

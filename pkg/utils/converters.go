@@ -2,7 +2,6 @@ package utils
 
 import (
 	"database/sql"
-	"time"
 )
 
 func SqlNullStringToString(sqlString sql.NullString) *string {
@@ -12,9 +11,9 @@ func SqlNullStringToString(sqlString sql.NullString) *string {
 	return nil
 }
 
-func SqlNullTimeToTime(sqlTime sql.NullTime) *time.Time {
+func SqlNullTimeToTime(sqlTime sql.NullTime) int {
 	if sqlTime.Valid {
-		return &sqlTime.Time
+		return int(sqlTime.Time.Unix())
 	}
-	return nil
+	return 0
 }

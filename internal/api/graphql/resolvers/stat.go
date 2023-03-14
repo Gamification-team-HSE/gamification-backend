@@ -3,6 +3,7 @@ package resolvers
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"gitlab.com/krespix/gamification-api/internal/models"
 	apiModels "gitlab.com/krespix/gamification-api/pkg/graphql/models"
@@ -50,8 +51,8 @@ func (r *Resolver) GetStat(ctx context.Context, id int) (*apiModels.Stat, error)
 		ID:          int(stat.ID),
 		Name:        stat.Name,
 		Description: utils.SqlNullStringToString(stat.Description),
-		CreatedAt:   stat.CreatedAt,
-		StartAt:     stat.StartAt,
+		CreatedAt:   int(stat.CreatedAt.Unix()),
+		StartAt:     int(stat.StartAt.Unix()),
 		Period:      stat.Period,
 		SeqPeriod:   utils.SqlNullStringToString(stat.SeqPeriod),
 	}, nil
@@ -77,8 +78,8 @@ func (r *Resolver) GetStats(ctx context.Context, pagination *apiModels.Paginatio
 			ID:          int(s.ID),
 			Name:        s.Name,
 			Description: utils.SqlNullStringToString(s.Description),
-			CreatedAt:   s.CreatedAt,
-			StartAt:     s.StartAt,
+			CreatedAt:   int(s.CreatedAt.Unix()),
+			StartAt:     int(s.StartAt.Unix()),
 			Period:      s.Period,
 			SeqPeriod:   utils.SqlNullStringToString(s.SeqPeriod),
 		})
@@ -101,7 +102,7 @@ func (r *Resolver) UpdateStat(ctx context.Context, stat apiModels.UpdateStat) (i
 		sStat.Description = *stat.Description
 	}
 	if stat.StartAt != nil {
-		sStat.StartedAt = *stat.StartAt
+		sStat.StartedAt = time.Unix(int64(*stat.StartAt), 0)
 	}
 	if stat.Period != nil {
 		sStat.Period = *stat.Period

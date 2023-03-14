@@ -36,12 +36,12 @@ func (r *Resolver) CreateEvent(ctx context.Context, event apiModels.NewEvent) (i
 	if event.EndAt != nil {
 
 		mEvent.EndAt = sql.NullTime{
-			Time:  *event.EndAt,
+			Time:  time.Unix(int64(*event.EndAt), 0),
 			Valid: true,
 		}
 	}
 
-	mEvent.StartAt = event.StartAt
+	mEvent.StartAt = time.Unix(int64(event.StartAt), 0)
 
 	err := r.eventService.Create(ctx, mEvent)
 	if err != nil {
@@ -87,13 +87,16 @@ func (r *Resolver) UpdateEvent(ctx context.Context, event apiModels.UpdateEvent)
 		}
 	}
 
+	startAt := time.Unix(int64(*event.StartAt), 0)
+	endAt := time.Unix(int64(*event.EndAt), 0)
+
 	err := r.eventService.Update(ctx, &models.UpdateEvent{
 		ID:          int64(event.ID),
 		Name:        stringToNullString(event.Name),
 		Description: stringToNullString(event.Description),
 		Image:       event.Image,
-		StartAt:     TimeToNullTime(event.StartAt),
-		EndAt:       TimeToNullTime(event.EndAt),
+		StartAt:     TimeToNullTime(&startAt),
+		EndAt:       TimeToNullTime(&endAt),
 	})
 	if err != nil {
 		fmt.Println("упал")
@@ -110,15 +113,19 @@ func (r *Resolver) GetEvent(ctx context.Context, id int) (*apiModels.GetEvent, e
 	if err != nil {
 		return nil, err
 	}
-	return &apiModels.GetEvent{
+	endAt := utils.SqlNullTimeToTime(event.EndAt)
+	res := &apiModels.GetEvent{
 		ID:          int(event.ID),
 		Name:        event.Name,
 		Description: utils.SqlNullStringToString(event.Description),
 		Image:       utils.SqlNullStringToString(event.Image),
-		CreatedAt:   event.CreatedAt,
-		StartAt:     event.StartAt,
-		EndAt:       utils.SqlNullTimeToTime(event.EndAt),
-	}, nil
+		CreatedAt:   int(event.CreatedAt.Unix()),
+		StartAt:     int(event.StartAt.Unix()),
+	}
+	if endAt != 0 {
+		res.EndAt = &endAt
+	}
+	return nil, nil
 }
 
 func (r *Resolver) GetEvents(ctx context.Context, pagination *apiModels.Pagination) (*apiModels.GetEventsResponse, error) {

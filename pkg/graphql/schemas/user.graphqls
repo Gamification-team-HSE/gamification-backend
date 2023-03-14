@@ -5,8 +5,8 @@ type User {
     id: Int!
     foreign_id: String
     email: String!
-    created_at: Time!
-    deleted_at: Time
+    created_at: Int!
+    deleted_at: Int
     role: Role!
     avatar: String
     name: String
