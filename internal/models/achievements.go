@@ -2,6 +2,9 @@ package models
 
 import (
 	"database/sql"
+	"database/sql/driver"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -19,6 +22,22 @@ type RepoAchievement struct {
 
 type Rules struct {
 	Blocks []*RulesBlock
+}
+
+func (r *Rules) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return fmt.Errorf("failed to cast value ti ")
+	}
+	return json.Unmarshal(b, r)
+}
+
+func (r *Rules) Value() (driver.Value, error) {
+	b, err := json.Marshal(r)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
 }
 
 type RulesBlock struct {

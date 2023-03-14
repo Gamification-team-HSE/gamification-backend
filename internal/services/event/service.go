@@ -54,9 +54,12 @@ func (s *service) List(ctx context.Context, pagination *models.Pagination) (*api
 			ID:          int(e.ID),
 			Name:        e.Name,
 			Description: utils.SqlNullStringToString(e.Description),
-			Image:       utils.SqlNullStringToString(e.Image),
 			CreatedAt:   int(e.CreatedAt.Unix()),
 			StartAt:     int(e.StartAt.Unix()),
+		}
+		if e.Image.Valid {
+			name := s.s3Client.BuildURL(s.folder, e.Image.String)
+			ev.Image = &name
 		}
 		endAt := utils.SqlNullTimeToTime(e.EndAt)
 		if endAt != 0 {
@@ -75,6 +78,9 @@ func (s *service) Get(ctx context.Context, id int) (*models.DbEvent, error) {
 	e, err := s.eventRepo.Get(ctx, int64(id))
 	if err != nil {
 		return nil, err
+	}
+	if e.Image.Valid {
+		e.Image.String = s.s3Client.BuildURL(s.folder, e.Image.String)
 	}
 	return e, nil
 }
