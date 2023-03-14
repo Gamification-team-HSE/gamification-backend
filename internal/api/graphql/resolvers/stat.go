@@ -28,6 +28,8 @@ func (r *Resolver) CreateStat(ctx context.Context, stat apiModels.NewStat) (inte
 	}
 	mStat.Period = stat.Period
 
+	mStat.StartAt = time.Unix(int64(stat.StartAt), 0)
+
 	err := r.statService.Create(ctx, mStat)
 	if err != nil {
 		return nil, err
