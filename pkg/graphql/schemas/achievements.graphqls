@@ -1,0 +1,44 @@
+type Achievement {
+    id: Int!
+    name: String!
+    description: String
+    image: String
+    rules: Rules!
+    end_at: Time
+    created_at: Time!
+}
+
+type Rules {
+    blocks: [RuleBlock!]!
+}
+
+type RuleBlock {
+    eventsRules: [EventRule!]
+    statRules: [StatRule!]
+    connection_operator: ConnectionOperator
+}
+
+type EventRule {
+    event_id: Int!
+    need_participate: Boolean!
+}
+
+type StatRule {
+    stat_id: Int!
+    target_value: Int!
+    comparison_type: Comparison!
+}
+
+enum ConnectionOperator {
+    InvalidConnectionOperator
+    And
+    Or
+}
+
+enum Comparison {
+    InvalidComparison
+    GreaterThan
+    Equals
+    NotEquals
+    LesserThan
+}

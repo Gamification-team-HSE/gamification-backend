@@ -11,6 +11,16 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
+type Achievement struct {
+	ID          int        `json:"id"`
+	Name        string     `json:"name"`
+	Description *string    `json:"description"`
+	Image       *string    `json:"image"`
+	Rules       *Rules     `json:"rules"`
+	EndAt       *time.Time `json:"end_at"`
+	CreatedAt   time.Time  `json:"created_at"`
+}
+
 type Event struct {
 	ID          int             `json:"id"`
 	Name        string          `json:"name"`
@@ -19,6 +29,11 @@ type Event struct {
 	CreatedAt   time.Time       `json:"created_at"`
 	StartAt     time.Time       `json:"start_at"`
 	EndAt       *time.Time      `json:"end_at"`
+}
+
+type EventRule struct {
+	EventID         int  `json:"event_id"`
+	NeedParticipate bool `json:"need_participate"`
 }
 
 type GetEvent struct {
@@ -74,6 +89,16 @@ type Pagination struct {
 	Size int `json:"size"`
 }
 
+type RuleBlock struct {
+	EventsRules        []*EventRule        `json:"eventsRules"`
+	StatRules          []*StatRule         `json:"statRules"`
+	ConnectionOperator *ConnectionOperator `json:"connection_operator"`
+}
+
+type Rules struct {
+	Blocks []*RuleBlock `json:"blocks"`
+}
+
 type Stat struct {
 	ID          int       `json:"id"`
 	Name        string    `json:"name"`
@@ -82,6 +107,12 @@ type Stat struct {
 	StartAt     time.Time `json:"start_at"`
 	Period      string    `json:"period"`
 	SeqPeriod   *string   `json:"seq_period"`
+}
+
+type StatRule struct {
+	StatID         int        `json:"stat_id"`
+	TargetValue    int        `json:"target_value"`
+	ComparisonType Comparison `json:"comparison_type"`
 }
 
 type UpdateEvent struct {
@@ -130,6 +161,96 @@ type UsersTotalInfo struct {
 	Admins int `json:"admins"`
 	Banned int `json:"banned"`
 	Active int `json:"active"`
+}
+
+type Comparison string
+
+const (
+	ComparisonInvalidComparison Comparison = "InvalidComparison"
+	ComparisonGreaterThan       Comparison = "GreaterThan"
+	ComparisonEquals            Comparison = "Equals"
+	ComparisonNotEquals         Comparison = "NotEquals"
+	ComparisonLesserThan        Comparison = "LesserThan"
+)
+
+var AllComparison = []Comparison{
+	ComparisonInvalidComparison,
+	ComparisonGreaterThan,
+	ComparisonEquals,
+	ComparisonNotEquals,
+	ComparisonLesserThan,
+}
+
+func (e Comparison) IsValid() bool {
+	switch e {
+	case ComparisonInvalidComparison, ComparisonGreaterThan, ComparisonEquals, ComparisonNotEquals, ComparisonLesserThan:
+		return true
+	}
+	return false
+}
+
+func (e Comparison) String() string {
+	return string(e)
+}
+
+func (e *Comparison) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Comparison(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Comparison", str)
+	}
+	return nil
+}
+
+func (e Comparison) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ConnectionOperator string
+
+const (
+	ConnectionOperatorInvalidConnectionOperator ConnectionOperator = "InvalidConnectionOperator"
+	ConnectionOperatorAnd                       ConnectionOperator = "And"
+	ConnectionOperatorOr                        ConnectionOperator = "Or"
+)
+
+var AllConnectionOperator = []ConnectionOperator{
+	ConnectionOperatorInvalidConnectionOperator,
+	ConnectionOperatorAnd,
+	ConnectionOperatorOr,
+}
+
+func (e ConnectionOperator) IsValid() bool {
+	switch e {
+	case ConnectionOperatorInvalidConnectionOperator, ConnectionOperatorAnd, ConnectionOperatorOr:
+		return true
+	}
+	return false
+}
+
+func (e ConnectionOperator) String() string {
+	return string(e)
+}
+
+func (e *ConnectionOperator) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ConnectionOperator(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ConnectionOperator", str)
+	}
+	return nil
+}
+
+func (e ConnectionOperator) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type Role string
