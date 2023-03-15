@@ -59,6 +59,7 @@ input CreateAchievement {
 input UpdateAchievement {
     id: Int!
     name: String
+    description: String
     image: Upload
     rules: InputRules
     end_at: Int

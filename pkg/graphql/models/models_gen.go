@@ -149,11 +149,12 @@ type StatRule struct {
 }
 
 type UpdateAchievement struct {
-	ID    int             `json:"id"`
-	Name  *string         `json:"name"`
-	Image *graphql.Upload `json:"image"`
-	Rules *InputRules     `json:"rules"`
-	EndAt *int            `json:"end_at"`
+	ID          int             `json:"id"`
+	Name        *string         `json:"name"`
+	Description *string         `json:"description"`
+	Image       *graphql.Upload `json:"image"`
+	Rules       *InputRules     `json:"rules"`
+	EndAt       *int            `json:"end_at"`
 }
 
 type UpdateEvent struct {

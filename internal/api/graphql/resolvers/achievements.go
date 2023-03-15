@@ -28,16 +28,61 @@ func (r *Resolver) CreateAchievement(ctx context.Context, achievement apiModels.
 }
 
 func (r *Resolver) UpdateAchievement(ctx context.Context, achievement apiModels.UpdateAchievement) (interface{}, error) {
+	updateAch := &models.UpdateAchievement{
+		ID: achievement.ID,
+	}
+	if achievement.Rules != nil {
+		updateAch.Rules = convertInputRulesToService(achievement.Rules)
+	}
+	if achievement.Name != nil {
+		updateAch.Name = *achievement.Name
+	}
+	if achievement.EndAt != nil {
+		updateAch.EndAt = time.Unix(int64(*achievement.EndAt), 0)
+	}
+	if achievement.Description != nil {
+		updateAch.Description = *achievement.Description
+	}
+	if achievement.Image != nil {
+		updateAch.Image = achievement.Image
+	}
+	err := r.achievementService.Update(ctx, updateAch)
+	if err != nil {
+		return nil, err
+	}
 	return nil, nil
 }
 
 func (r *Resolver) DeleteAchievement(ctx context.Context, id int) (interface{}, error) {
+	err := r.achievementService.Delete(ctx, id)
+	if err != nil {
+		return nil, err
+	}
 	return nil, nil
 }
 
 func (r *Resolver) GetAchievements(ctx context.Context, pagination *apiModels.Pagination) (*apiModels.GetAchievementsResponse, error) {
-
-	return nil, nil
+	var (
+		mPagination *models.Pagination
+	)
+	if pagination != nil {
+		mPagination = &models.Pagination{
+			Page: pagination.Page,
+			Size: pagination.Size,
+		}
+	}
+	achReps, err := r.achievementService.List(ctx, mPagination)
+	if err != nil {
+		return nil, err
+	}
+	resList := make([]*apiModels.Achievement, 0, len(achReps.Achievements))
+	for _, ach := range achReps.Achievements {
+		resList = append(resList, repoAchToAPI(ach))
+	}
+	return &apiModels.GetAchievementsResponse{
+		Total:        achReps.Total,
+		Achievements: resList,
+	}, nil
 }
 
 func (r *Resolver) GetAchievement(ctx context.Context, id int) (*apiModels.Achievement, error) {

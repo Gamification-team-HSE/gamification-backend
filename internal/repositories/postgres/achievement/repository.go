@@ -21,10 +21,52 @@ type Repository interface {
 	ExistsByName(ctx context.Context, name string) (bool, error)
 	Update(ctx context.Context, achievement *models.RepoAchievement) error
 	Get(ctx context.Context, id int) (*models.RepoAchievement, error)
+	Total(ctx context.Context) (int, error)
+	List(ctx context.Context, achievement *models.RepoPagination) ([]*models.RepoAchievement, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type repository struct {
 	*postgres.Client
+}
+
+func (r *repository) Delete(ctx context.Context, id int) error {
+	qb := utils.PgQB().
+		Delete(achievementsTableName).
+		Where(sq.Eq{"id": id})
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = r.GetDBx().ExecContext(ctx, query, args...)
+	return err
+}
+
+func (r *repository) List(ctx context.Context, pagination *models.RepoPagination) ([]*models.RepoAchievement, error) {
+	qb := utils.PgQB().
+		Select("*").
+		From(achievementsTableName)
+	if pagination != nil {
+		qb = qb.Offset(uint64(pagination.Offset))
+		qb = qb.Limit(uint64(pagination.Limit))
+	}
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return nil, err
+	}
+	var res []*models.RepoAchievement
+	err = r.GetDBx().SelectContext(ctx, &res, query, args...)
+	return res, err
+}
+
+func (r *repository) Total(ctx context.Context) (int, error) {
+	totalQuery := "select count(*) from achievements"
+	var total int
+	err := r.GetDBx().GetContext(ctx, &total, totalQuery)
+	if err != nil {
+		return 0, err
+	}
+	return total, nil
 }
 
 func (r *repository) Get(ctx context.Context, id int) (*models.RepoAchievement, error) {

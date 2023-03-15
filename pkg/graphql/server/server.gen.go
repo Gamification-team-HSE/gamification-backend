@@ -1051,6 +1051,7 @@ input CreateAchievement {
 input UpdateAchievement {
     id: Int!
     name: String
+    description: String
     image: Upload
     rules: InputRules
     end_at: Int
@@ -8479,7 +8480,7 @@ func (ec *executionContext) unmarshalInputUpdateAchievement(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "name", "image", "rules", "end_at"}
+	fieldsInOrder := [...]string{"id", "name", "description", "image", "rules", "end_at"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8499,6 +8500,14 @@ func (ec *executionContext) unmarshalInputUpdateAchievement(ctx context.Context,
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
