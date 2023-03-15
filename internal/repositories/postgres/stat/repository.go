@@ -43,7 +43,8 @@ func (r *repository) GetUserStats(ctx context.Context, userID int) ([]*models.Us
 			"s.description as description").
 		From(fmt.Sprintf("%s as s", statsTableName)).
 		Join(fmt.Sprintf("%s as us on s.id = us.stat_id", userStatsTableName)).
-		Where(sq.Eq{"us.user_id": userID})
+		Where(sq.Eq{"us.user_id": userID}).
+		OrderBy("desc us.value")
 	query, args, err := qb.ToSql()
 	if err != nil {
 		return nil, err

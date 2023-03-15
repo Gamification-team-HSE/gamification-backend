@@ -41,7 +41,8 @@ func (r *repository) GetUsersAchievements(ctx context.Context, userID int) ([]*m
 			"a.image as image").
 		From(fmt.Sprintf("%s as a", achievementsTableName)).
 		Join(fmt.Sprintf("%s as ua on ua.achievement_id = a.id", userAchievementsTableName)).
-		Where(sq.Eq{"ua.user_id": userID})
+		Where(sq.Eq{"ua.user_id": userID}).
+		OrderBy("desc ua.created_at")
 	query, args, err := qb.ToSql()
 	if err != nil {
 		return nil, err

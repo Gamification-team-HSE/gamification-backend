@@ -47,7 +47,8 @@ func (r *repository) GetUserEvents(ctx context.Context, userID int) ([]*models.U
 			"ue.created_at as created_at").
 		From(fmt.Sprintf("%s as e", eventsTableName)).
 		Join(fmt.Sprintf("%s as ue on ue.event_id = e.id", userEventsTableName)).
-		Where(sq.Eq{"ue.user_id": userID})
+		Where(sq.Eq{"ue.user_id": userID}).
+		OrderBy("desc ue.created_at")
 	query, args, err := qb.ToSql()
 	if err != nil {
 		return nil, err
