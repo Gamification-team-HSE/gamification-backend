@@ -4,8 +4,8 @@ type Achievement {
     description: String
     image: String
     rules: Rules!
-    end_at: Time
-    created_at: Time!
+    end_at: Int
+    created_at: Int!
 }
 
 type Rules {
@@ -53,7 +53,7 @@ input CreateAchievement {
     description: String
     image: Upload
     rules: InputRules!
-    end_at: Time
+    end_at: Int
 }
 
 input UpdateAchievement {
@@ -61,7 +61,7 @@ input UpdateAchievement {
     name: String
     image: Upload
     rules: InputRules
-    end_at: Time
+    end_at: Int
 }
 
 input InputRules {
@@ -69,8 +69,8 @@ input InputRules {
 }
 
 input InputRuleBlock {
-    eventsRules: [InputStatRule!]
-    statRules: [InputRuleBlock!]
+    eventsRules: [InputEventRule!]
+    statRules: [InputStatRule!]
     connection_operator: ConnectionOperator
 }
 

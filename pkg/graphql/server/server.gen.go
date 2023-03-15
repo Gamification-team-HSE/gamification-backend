@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -997,8 +996,8 @@ var sources = []*ast.Source{
     description: String
     image: String
     rules: Rules!
-    end_at: Time
-    created_at: Time!
+    end_at: Int
+    created_at: Int!
 }
 
 type Rules {
@@ -1046,7 +1045,7 @@ input CreateAchievement {
     description: String
     image: Upload
     rules: InputRules!
-    end_at: Time
+    end_at: Int
 }
 
 input UpdateAchievement {
@@ -1054,7 +1053,7 @@ input UpdateAchievement {
     name: String
     image: Upload
     rules: InputRules
-    end_at: Time
+    end_at: Int
 }
 
 input InputRules {
@@ -1062,8 +1061,8 @@ input InputRules {
 }
 
 input InputRuleBlock {
-    eventsRules: [InputStatRule!]
-    statRules: [InputRuleBlock!]
+    eventsRules: [InputEventRule!]
+    statRules: [InputStatRule!]
     connection_operator: ConnectionOperator
 }
 
@@ -1949,9 +1948,9 @@ func (ec *executionContext) _Achievement_end_at(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*time.Time)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Achievement_end_at(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1961,7 +1960,7 @@ func (ec *executionContext) fieldContext_Achievement_end_at(ctx context.Context,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1993,9 +1992,9 @@ func (ec *executionContext) _Achievement_created_at(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(time.Time)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Achievement_created_at(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2005,7 +2004,7 @@ func (ec *executionContext) fieldContext_Achievement_created_at(ctx context.Cont
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8103,7 +8102,7 @@ func (ec *executionContext) unmarshalInputCreateAchievement(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("end_at"))
-			it.EndAt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			it.EndAt, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8167,7 +8166,7 @@ func (ec *executionContext) unmarshalInputInputRuleBlock(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("eventsRules"))
-			it.EventsRules, err = ec.unmarshalOInputStatRule2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐInputStatRuleᚄ(ctx, v)
+			it.EventsRules, err = ec.unmarshalOInputEventRule2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐInputEventRuleᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8175,7 +8174,7 @@ func (ec *executionContext) unmarshalInputInputRuleBlock(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("statRules"))
-			it.StatRules, err = ec.unmarshalOInputRuleBlock2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐInputRuleBlockᚄ(ctx, v)
+			it.StatRules, err = ec.unmarshalOInputStatRule2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐInputStatRuleᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8523,7 +8522,7 @@ func (ec *executionContext) unmarshalInputUpdateAchievement(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("end_at"))
-			it.EndAt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			it.EndAt, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10289,6 +10288,11 @@ func (ec *executionContext) marshalNGetUsersResponse2ᚖgitlabᚗcomᚋkrespix�
 	return ec._GetUsersResponse(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNInputEventRule2ᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐInputEventRule(ctx context.Context, v interface{}) (*models.InputEventRule, error) {
+	res, err := ec.unmarshalInputInputEventRule(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNInputRuleBlock2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐInputRuleBlockᚄ(ctx context.Context, v interface{}) ([]*models.InputRuleBlock, error) {
 	var vSlice []interface{}
 	if v != nil {
@@ -10500,21 +10504,6 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v inter
 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	res := graphql.MarshalString(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
-	res, err := graphql.UnmarshalTime(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
-	res := graphql.MarshalTime(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10978,7 +10967,7 @@ func (ec *executionContext) marshalOGetAchievementsResponse2ᚖgitlabᚗcomᚋkr
 	return ec._GetAchievementsResponse(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOInputRuleBlock2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐInputRuleBlockᚄ(ctx context.Context, v interface{}) ([]*models.InputRuleBlock, error) {
+func (ec *executionContext) unmarshalOInputEventRule2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐInputEventRuleᚄ(ctx context.Context, v interface{}) ([]*models.InputEventRule, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -10987,10 +10976,10 @@ func (ec *executionContext) unmarshalOInputRuleBlock2ᚕᚖgitlabᚗcomᚋkrespi
 		vSlice = graphql.CoerceList(v)
 	}
 	var err error
-	res := make([]*models.InputRuleBlock, len(vSlice))
+	res := make([]*models.InputEventRule, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNInputRuleBlock2ᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐInputRuleBlock(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNInputEventRule2ᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐInputEventRule(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -11110,22 +11099,6 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	res := graphql.MarshalString(*v)
-	return res
-}
-
-func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalTime(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalTime(*v)
 	return res
 }
 

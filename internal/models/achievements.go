@@ -12,7 +12,7 @@ import (
 
 type RepoAchievement struct {
 	ID          int            `db:"id"`
-	Name        string         `db:"string"`
+	Name        string         `db:"name"`
 	Description sql.NullString `db:"description"`
 	Image       sql.NullString `db:"image"`
 	EndAt       sql.NullTime   `db:"end_at"`
@@ -90,4 +90,9 @@ type UpdateAchievement struct {
 	Image       *graphql.Upload
 	Rules       *Rules
 	EndAt       time.Time
+}
+
+type GetAchievementsResponse struct {
+	Achievements []*RepoAchievement
+	Total        int
 }

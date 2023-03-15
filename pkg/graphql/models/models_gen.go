@@ -6,19 +6,18 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 )
 
 type Achievement struct {
-	ID          int        `json:"id"`
-	Name        string     `json:"name"`
-	Description *string    `json:"description"`
-	Image       *string    `json:"image"`
-	Rules       *Rules     `json:"rules"`
-	EndAt       *time.Time `json:"end_at"`
-	CreatedAt   time.Time  `json:"created_at"`
+	ID          int     `json:"id"`
+	Name        string  `json:"name"`
+	Description *string `json:"description"`
+	Image       *string `json:"image"`
+	Rules       *Rules  `json:"rules"`
+	EndAt       *int    `json:"end_at"`
+	CreatedAt   int     `json:"created_at"`
 }
 
 type CreateAchievement struct {
@@ -26,7 +25,7 @@ type CreateAchievement struct {
 	Description *string         `json:"description"`
 	Image       *graphql.Upload `json:"image"`
 	Rules       *InputRules     `json:"rules"`
-	EndAt       *time.Time      `json:"end_at"`
+	EndAt       *int            `json:"end_at"`
 }
 
 type Event struct {
@@ -80,8 +79,8 @@ type InputEventRule struct {
 }
 
 type InputRuleBlock struct {
-	EventsRules        []*InputStatRule    `json:"eventsRules"`
-	StatRules          []*InputRuleBlock   `json:"statRules"`
+	EventsRules        []*InputEventRule   `json:"eventsRules"`
+	StatRules          []*InputStatRule    `json:"statRules"`
 	ConnectionOperator *ConnectionOperator `json:"connection_operator"`
 }
 
@@ -154,7 +153,7 @@ type UpdateAchievement struct {
 	Name  *string         `json:"name"`
 	Image *graphql.Upload `json:"image"`
 	Rules *InputRules     `json:"rules"`
-	EndAt *time.Time      `json:"end_at"`
+	EndAt *int            `json:"end_at"`
 }
 
 type UpdateEvent struct {
