@@ -107,6 +107,11 @@ func (r *queryResolver) GetUsers(ctx context.Context, pagination *models.Paginat
 	panic(fmt.Errorf("not implemented: GetUsers - GetUsers"))
 }
 
+// GetFullUser is the resolver for the GetFullUser field.
+func (r *queryResolver) GetFullUser(ctx context.Context, id int) (*models.FullUser, error) {
+	panic(fmt.Errorf("not implemented: GetFullUser - GetFullUser"))
+}
+
 // GetAchievement is the resolver for the GetAchievement field.
 func (r *queryResolver) GetAchievement(ctx context.Context, id int) (*models.Achievement, error) {
 	panic(fmt.Errorf("not implemented: GetAchievement - GetAchievement"))

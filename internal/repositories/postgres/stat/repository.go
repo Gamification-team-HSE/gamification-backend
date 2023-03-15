@@ -3,6 +3,7 @@ package stat
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -13,7 +14,8 @@ import (
 )
 
 const (
-	statsTableName = "stats"
+	statsTableName     = "stats"
+	userStatsTableName = "users_stats"
 )
 
 type Repository interface {
@@ -26,10 +28,32 @@ type Repository interface {
 	Delete(ctx context.Context, id int) error
 	Total(ctx context.Context) (int, error)
 	Update(ctx context.Context, stat *models.UpdateStat) error
+	GetUserStats(ctx context.Context, userID int) ([]*models.UserStat, error)
 }
 
 type repository struct {
 	*postgres.Client
+}
+
+func (r *repository) GetUserStats(ctx context.Context, userID int) ([]*models.UserStat, error) {
+	qb := utils.PgQB().
+		Select("s.id as stat_id," +
+			"us.value as value," +
+			"s.name as name," +
+			"s.description as description").
+		From(fmt.Sprintf("%s as s", statsTableName)).
+		Join(fmt.Sprintf("%s as us on s.id = us.stat_id", userStatsTableName)).
+		Where(sq.Eq{"us.user_id": userID})
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return nil, err
+	}
+	var res []*models.UserStat
+	err = r.GetDBx().SelectContext(ctx, &res, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (r *repository) Update(ctx context.Context, stat *models.UpdateStat) error {

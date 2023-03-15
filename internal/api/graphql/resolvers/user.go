@@ -193,3 +193,50 @@ func modelsUserToAPI(user *models.User) *apiModels.User {
 	}
 	return usr
 }
+
+func (r *Resolver) GetFullUser(ctx context.Context, id int) (*apiModels.FullUser, error) {
+	fullUser, err := r.userService.GetFullUser(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	resStats := make([]*apiModels.UserStat, 0, len(fullUser.Stats))
+	resEvents := make([]*apiModels.UserEvent, 0, len(fullUser.Events))
+	resAch := make([]*apiModels.UserAch, 0, len(fullUser.Achievements))
+
+	for _, ev := range fullUser.Events {
+		resEvents = append(resEvents, &apiModels.UserEvent{
+			EventID:     ev.EventID,
+			Name:        ev.Name,
+			Image:       utils.SqlNullStringToString(ev.Image),
+			Description: utils.SqlNullStringToString(ev.Description),
+			CreatedAt:   int(ev.CreatedAt.Unix()),
+		})
+	}
+	for _, s := range fullUser.Stats {
+		resStats = append(resStats, &apiModels.UserStat{
+			StatID:      s.StatID,
+			Name:        s.Name,
+			Description: utils.SqlNullStringToString(s.Description),
+			Value:       s.Value,
+		})
+	}
+
+	for _, a := range fullUser.Achievements {
+		resAch = append(resAch, &apiModels.UserAch{
+			AchID:       a.AchID,
+			Name:        a.Name,
+			Description: utils.SqlNullStringToString(a.Description),
+			CreatedAt:   int(a.CreatedAt.Unix()),
+			Image:       utils.SqlNullStringToString(a.Image),
+		})
+	}
+
+	res := &apiModels.FullUser{
+		User:         modelsUserToAPI(fullUser.User),
+		Stats:        resStats,
+		Events:       resEvents,
+		Achievements: resAch,
+	}
+	return res, nil
+}

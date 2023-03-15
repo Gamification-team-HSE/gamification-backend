@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	eventsTableName = "event"
+	eventsTableName     = "event"
+	userEventsTableName = "user_events"
 )
 
 type Repository interface {
@@ -30,10 +31,33 @@ type Repository interface {
 	List(ctx context.Context, pagination *models.RepoPagination) ([]*models.DbEvent, error)
 	Total(ctx context.Context) (int, error)
 	Delete(ctx context.Context, id int) error
+	GetUserEvents(ctx context.Context, userID int) ([]*models.UserEvent, error)
 }
 
 type repository struct {
 	*postgres.Client
+}
+
+func (r *repository) GetUserEvents(ctx context.Context, userID int) ([]*models.UserEvent, error) {
+	qb := utils.PgQB().
+		Select("e.id as event_id, " +
+			"e.name as name," +
+			"e.description as description," +
+			"e.image as image," +
+			"ue.created_at as created_at").
+		From(fmt.Sprintf("%s as e", eventsTableName)).
+		Join(fmt.Sprintf("%s as ue on ue.event_id = e.id", userEventsTableName)).
+		Where(sq.Eq{"ue.user_id": userID})
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return nil, err
+	}
+	var res []*models.UserEvent
+	err = r.GetDBx().SelectContext(ctx, &res, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (r *repository) Delete(ctx context.Context, id int) error {

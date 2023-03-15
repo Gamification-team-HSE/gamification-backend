@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	achievementsTableName = "achievements"
+	achievementsTableName     = "achievements"
+	userAchievementsTableName = "user_achievements"
 )
 
 type Repository interface {
@@ -24,10 +25,33 @@ type Repository interface {
 	Total(ctx context.Context) (int, error)
 	List(ctx context.Context, achievement *models.RepoPagination) ([]*models.RepoAchievement, error)
 	Delete(ctx context.Context, id int) error
+	GetUsersAchievements(ctx context.Context, userID int) ([]*models.UserAch, error)
 }
 
 type repository struct {
 	*postgres.Client
+}
+
+func (r *repository) GetUsersAchievements(ctx context.Context, userID int) ([]*models.UserAch, error) {
+	qb := utils.PgQB().
+		Select("a.id as ach_id," +
+			"a.name as name," +
+			"ua.created_at as created_at," +
+			"a.description as description," +
+			"a.image as image").
+		From(fmt.Sprintf("%s as a", achievementsTableName)).
+		Join(fmt.Sprintf("%s as ua on ua.achievement_id = a.id", userAchievementsTableName)).
+		Where(sq.Eq{"ua.user_id": userID})
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return nil, err
+	}
+	var userAchList []*models.UserAch
+	err = r.GetDBx().SelectContext(ctx, &userAchList, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	return userAchList, nil
 }
 
 func (r *repository) Delete(ctx context.Context, id int) error {

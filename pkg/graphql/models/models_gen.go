@@ -43,6 +43,13 @@ type EventRule struct {
 	NeedParticipate bool `json:"need_participate"`
 }
 
+type FullUser struct {
+	User         *User        `json:"user"`
+	Stats        []*UserStat  `json:"stats"`
+	Events       []*UserEvent `json:"events"`
+	Achievements []*UserAch   `json:"achievements"`
+}
+
 type GetAchievementsResponse struct {
 	Total        int            `json:"total"`
 	Achievements []*Achievement `json:"achievements"`
@@ -193,10 +200,33 @@ type User struct {
 	Name      *string `json:"name"`
 }
 
+type UserAch struct {
+	AchID       int     `json:"ach_id"`
+	Name        string  `json:"name"`
+	Description *string `json:"description"`
+	CreatedAt   int     `json:"created_at"`
+	Image       *string `json:"image"`
+}
+
+type UserEvent struct {
+	EventID     int     `json:"event_id"`
+	Name        string  `json:"name"`
+	Image       *string `json:"image"`
+	Description *string `json:"description"`
+	CreatedAt   int     `json:"created_at"`
+}
+
 type UserFilter struct {
 	Active *bool `json:"active"`
 	Banned *bool `json:"banned"`
 	Admins *bool `json:"admins"`
+}
+
+type UserStat struct {
+	StatID      int     `json:"stat_id"`
+	Name        string  `json:"name"`
+	Description *string `json:"description"`
+	Value       int     `json:"value"`
 }
 
 type UsersTotalInfo struct {

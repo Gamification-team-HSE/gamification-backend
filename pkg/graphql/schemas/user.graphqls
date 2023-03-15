@@ -48,3 +48,33 @@ type UsersTotalInfo {
     banned: Int!
     active: Int!
 }
+
+type FullUser {
+    user: User!
+    stats: [UserStat]!
+    events: [UserEvent]!
+    achievements: [UserAch!]!
+}
+
+type UserEvent {
+    event_id: Int!
+    name: String!
+    image: String
+    description: String
+    created_at: Int!
+}
+
+type UserStat {
+    stat_id: Int!
+    name: String!
+    description: String
+    value: Int!
+}
+
+type UserAch {
+    ach_id: Int!
+    name: String!
+    description: String
+    created_at: Int!
+    image: String
+}

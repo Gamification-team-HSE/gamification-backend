@@ -42,6 +42,13 @@ func (s *service) List(ctx context.Context, pagination *models.Pagination) (*mod
 	if err != nil {
 		return nil, err
 	}
+
+	for i, item := range list {
+		if item.Image.Valid {
+			list[i].Image.String = s.s3Client.BuildURL(s.folder, item.Image.String)
+		}
+	}
+
 	return &models.GetAchievementsResponse{
 		Achievements: list,
 		Total:        total,

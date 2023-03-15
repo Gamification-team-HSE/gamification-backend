@@ -88,7 +88,7 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	achRepo := achievementRepository.New(db)
 
 	//init services
-	userSrc := userService.New(userRepo, validate, s3Client, cfg.Buckets.Users)
+	userSrc := userService.New(userRepo, validate, s3Client, cfg.Buckets.Users, statRepo, achRepo, eventRepo)
 	authSrc := authService.New(smtpClient, userRepo, authRepo, validate, cfg.Auth.JWTSecret, time.Hour*24)
 	statSrc := statService.New(statRepo, validate)
 	imageSrc := imageService.New(cfg.ImageService)

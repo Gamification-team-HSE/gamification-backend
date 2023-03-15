@@ -49,3 +49,33 @@ type UpdateUser struct {
 	Name   string `validate:"omitempty,max=256"`
 	Avatar *graphql.Upload
 }
+
+type FullUser struct {
+	*User
+	Stats        []*UserStat
+	Events       []*UserEvent
+	Achievements []*UserAch
+}
+
+type UserStat struct {
+	StatID      int            `db:"stat_id"`
+	Value       int            `db:"value"`
+	Name        string         `db:"name"`
+	Description sql.NullString `db:"description"`
+}
+
+type UserEvent struct {
+	EventID     int            `db:"event_id"`
+	CreatedAt   time.Time      `db:"created_at"`
+	Image       sql.NullString `db:"image"`
+	Name        string         `db:"name"`
+	Description sql.NullString `db:"description"`
+}
+
+type UserAch struct {
+	AchID       int            `db:"ach_id"`
+	CreatedAt   time.Time      `db:"created_at"`
+	Name        string         `db:"name"`
+	Description sql.NullString `db:"description"`
+	Image       sql.NullString `db:"image"`
+}

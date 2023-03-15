@@ -9,6 +9,9 @@ import (
 	"gitlab.com/krespix/gamification-api/internal/clients/s3"
 	"gitlab.com/krespix/gamification-api/internal/core/config"
 	"gitlab.com/krespix/gamification-api/internal/models"
+	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/achievement"
+	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/event"
+	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/stat"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/user"
 	"gitlab.com/krespix/gamification-api/internal/services/image"
 	errors "gitlab.com/krespix/gamification-api/pkg/utils/graphq_erorrs"
@@ -23,15 +26,59 @@ type Service interface {
 	Recover(ctx context.Context, id int) error
 	Delete(ctx context.Context, id int) error
 	Update(ctx context.Context, user *models.UpdateUser) error
+	GetFullUser(ctx context.Context, id int) (*models.FullUser, error)
 }
 
 type service struct {
 	validate *validator.Validate
 
-	userRepo user.Repository
+	userRepo         user.Repository
+	statRepo         stat.Repository
+	achievementsRepo achievement.Repository
+	eventsRepo       event.Repository
 
 	folder   string
 	s3Client s3.Client
+}
+
+func (s *service) GetFullUser(ctx context.Context, id int) (*models.FullUser, error) {
+	userAchList, err := s.achievementsRepo.GetUsersAchievements(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	for i, v := range userAchList {
+		if v.Image.Valid {
+			userAchList[i].Image.String = s.s3Client.BuildURL(s.folder, v.Image.String)
+		}
+	}
+	userStats, err := s.statRepo.GetUserStats(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	userEvents, err := s.eventsRepo.GetUserEvents(ctx, id)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	for i, ue := range userEvents {
+		if ue.Image.Valid {
+			userEvents[i].Image.String = s.s3Client.BuildURL(s.folder, ue.Image.String)
+		}
+	}
+	u, err := s.userRepo.Get(ctx, int64(id))
+	if err != nil {
+		return nil, err
+	}
+	if u.Avatar.Valid {
+		u.Avatar.String = s.s3Client.BuildURL(s.folder, u.Avatar.String)
+	}
+
+	return &models.FullUser{
+		User:         u,
+		Stats:        userStats,
+		Events:       userEvents,
+		Achievements: userAchList,
+	}, nil
 }
 
 func (s *service) Update(ctx context.Context, user *models.UpdateUser) error {
@@ -40,7 +87,6 @@ func (s *service) Update(ctx context.Context, user *models.UpdateUser) error {
 		return errors.CustomError(ctx, 400, fmt.Sprintf("validation failed: %v", err))
 	}
 	updateUserReq := &models.User{ID: int64(user.ID)}
-	//TODO run upload in goroutine
 	if user.Avatar != nil {
 		oldUser, err := s.userRepo.Get(ctx, int64(user.ID))
 		if err != nil {
@@ -183,11 +229,17 @@ func New(
 	validate *validator.Validate,
 	s3Client s3.Client,
 	folder string,
+	statRepo stat.Repository,
+	achievementsRepo achievement.Repository,
+	eventsRepo event.Repository,
 ) Service {
 	return &service{
-		userRepo: userRepo,
-		validate: validate,
-		folder:   folder,
-		s3Client: s3Client,
+		userRepo:         userRepo,
+		validate:         validate,
+		folder:           folder,
+		s3Client:         s3Client,
+		statRepo:         statRepo,
+		achievementsRepo: achievementsRepo,
+		eventsRepo:       eventsRepo,
 	}
 }
