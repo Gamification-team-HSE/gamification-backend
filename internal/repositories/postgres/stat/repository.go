@@ -44,7 +44,7 @@ func (r *repository) GetUserStats(ctx context.Context, userID int) ([]*models.Us
 		From(fmt.Sprintf("%s as s", statsTableName)).
 		Join(fmt.Sprintf("%s as us on s.id = us.stat_id", userStatsTableName)).
 		Where(sq.Eq{"us.user_id": userID}).
-		OrderBy("desc us.value")
+		OrderBy("us.value")
 	query, args, err := qb.ToSql()
 	if err != nil {
 		return nil, err
@@ -52,6 +52,9 @@ func (r *repository) GetUserStats(ctx context.Context, userID int) ([]*models.Us
 	var res []*models.UserStat
 	err = r.GetDBx().SelectContext(ctx, &res, query, args...)
 	if err != nil {
+		if sql.ErrNoRows == err {
+			return nil, err
+		}
 		return nil, err
 	}
 	return res, nil

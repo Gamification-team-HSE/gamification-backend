@@ -42,7 +42,7 @@ func (r *repository) GetUsersAchievements(ctx context.Context, userID int) ([]*m
 		From(fmt.Sprintf("%s as a", achievementsTableName)).
 		Join(fmt.Sprintf("%s as ua on ua.achievement_id = a.id", userAchievementsTableName)).
 		Where(sq.Eq{"ua.user_id": userID}).
-		OrderBy("desc ua.created_at")
+		OrderBy("ua.created_at")
 	query, args, err := qb.ToSql()
 	if err != nil {
 		return nil, err
@@ -50,6 +50,9 @@ func (r *repository) GetUsersAchievements(ctx context.Context, userID int) ([]*m
 	var userAchList []*models.UserAch
 	err = r.GetDBx().SelectContext(ctx, &userAchList, query, args...)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return userAchList, nil

@@ -48,7 +48,7 @@ func (r *repository) GetUserEvents(ctx context.Context, userID int) ([]*models.U
 		From(fmt.Sprintf("%s as e", eventsTableName)).
 		Join(fmt.Sprintf("%s as ue on ue.event_id = e.id", userEventsTableName)).
 		Where(sq.Eq{"ue.user_id": userID}).
-		OrderBy("desc ue.created_at")
+		OrderBy("ue.created_at")
 	query, args, err := qb.ToSql()
 	if err != nil {
 		return nil, err
@@ -56,6 +56,9 @@ func (r *repository) GetUserEvents(ctx context.Context, userID int) ([]*models.U
 	var res []*models.UserEvent
 	err = r.GetDBx().SelectContext(ctx, &res, query, args...)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return res, nil
