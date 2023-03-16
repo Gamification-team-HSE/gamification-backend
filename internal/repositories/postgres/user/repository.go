@@ -14,7 +14,9 @@ import (
 )
 
 const (
-	usersTableName = "users"
+	usersTableName            = "users"
+	userStatTableName         = "users_stats"
+	userAchievementsTableName = "user_achievements"
 )
 
 type Repository interface {
@@ -38,10 +40,62 @@ type Repository interface {
 	Update(ctx context.Context, id int, user *models.User) error
 	// Recover очищает поле deleted_at
 	Recover(ctx context.Context, id int) error
+	GetUserRatingByStat(ctx context.Context, statID int) ([]*models.UserRatingByStat, error)
+	GetUserRatingByAchs(ctx context.Context) ([]*models.UserRatingByAch, error)
 }
 
 type repository struct {
 	*postgres.Client
+}
+
+func (r *repository) GetUserRatingByAchs(ctx context.Context) ([]*models.UserRatingByAch, error) {
+	qb := utils.PgQB().
+		Select("u.id as user_id," +
+			"u.name as name," +
+			"u.avatar as avatar," +
+			"u.email as email," +
+			"count(ua.achievement_id) as total_ach").
+		From(fmt.Sprintf("%s as u", usersTableName)).
+		Join(fmt.Sprintf("%s as ua on ua.user_id=u.id", userAchievementsTableName)).
+		Where(sq.Expr("u.deleted_at is null")).
+		GroupBy("u.id").
+		OrderBy("total_ach")
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return nil, err
+	}
+	var res []*models.UserRatingByAch
+	err = r.GetDBx().SelectContext(ctx, &res, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (r *repository) GetUserRatingByStat(ctx context.Context, statID int) ([]*models.UserRatingByStat, error) {
+	qb := utils.PgQB().
+		Select("u.id as user_id," +
+			"u.name as name," +
+			"u.avatar as avatar," +
+			"u.email as email," +
+			"us.value as value").
+		From(fmt.Sprintf("%s as u", usersTableName)).
+		Join(fmt.Sprintf("%s as us on us.user_id=u.id", userStatTableName)).
+		Where(sq.And{
+			sq.Eq{"stat_id": statID},
+			sq.Expr("u.deleted_at is null"),
+		}).
+		OrderBy("us.value")
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return nil, err
+	}
+	var res []*models.UserRatingByStat
+	err = r.GetDBx().SelectContext(ctx, &res, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (r *repository) Recover(ctx context.Context, id int) error {

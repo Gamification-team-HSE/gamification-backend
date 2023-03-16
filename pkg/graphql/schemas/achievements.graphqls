@@ -85,3 +85,32 @@ input InputStatRule {
     target_value: Int!
     comparison_type: Comparison!
 }
+
+type RatingByAch {
+    users: [UserRatingByAch!]!
+    total: Int!
+}
+
+type UserRatingByAch {
+    user_id: Int!
+    name: String
+    email: String!
+    avatar: String
+    place: Int!
+    total_achs: Int!
+}
+
+type RatingByStat {
+    stat_id: Int!
+    total: Int!
+    users: [UserRatingByStat!]!
+}
+
+type UserRatingByStat {
+    user_id: Int!
+    name: String
+    email: String!
+    avatar: String
+    place: Int!
+    value: Int!
+}

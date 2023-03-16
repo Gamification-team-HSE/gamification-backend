@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sort"
 
 	"github.com/go-playground/validator/v10"
 	"gitlab.com/krespix/gamification-api/internal/clients/s3"
@@ -27,6 +28,8 @@ type Service interface {
 	Delete(ctx context.Context, id int) error
 	Update(ctx context.Context, user *models.UpdateUser) error
 	GetFullUser(ctx context.Context, id int) (*models.FullUser, error)
+	GetRatingByStat(ctx context.Context, statID int) (*models.RatingByStat, error)
+	GetRatingByAchs(ctx context.Context) (*models.RatingByAchs, error)
 }
 
 type service struct {
@@ -39,6 +42,83 @@ type service struct {
 
 	folder   string
 	s3Client s3.Client
+}
+
+func (s *service) GetRatingByAchs(ctx context.Context) (*models.RatingByAchs, error) {
+	users, err := s.userRepo.GetUserRatingByAchs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].TotalAchs > users[j].TotalAchs
+	})
+	for i, u := range users {
+		if u.Avatar.Valid {
+			users[i].Avatar.String = s.s3Client.BuildURL(s.folder, u.Avatar.String)
+		}
+	}
+	s.calculatePlacesByAchs(users)
+	return &models.RatingByAchs{
+		Total: len(users),
+		Users: users,
+	}, nil
+}
+
+func (s *service) calculatePlacesByAchs(users []*models.UserRatingByAch) {
+	if len(users) == 0 {
+		return
+	}
+	users[0].Place = 1
+	prevVal := users[0].TotalAchs
+	prevPlace := users[0].Place
+	for i := 1; i < len(users); i++ {
+		if prevVal == users[i].TotalAchs {
+			users[i].Place = prevPlace
+		} else {
+			users[i].Place = i + 1
+			prevPlace = users[i].Place
+		}
+		prevVal = users[i].TotalAchs
+	}
+}
+
+func (s *service) GetRatingByStat(ctx context.Context, statID int) (*models.RatingByStat, error) {
+	users, err := s.userRepo.GetUserRatingByStat(ctx, statID)
+	if err != nil {
+		return nil, err
+	}
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].Value > users[j].Value
+	})
+	for i, u := range users {
+		if u.Avatar.Valid {
+			users[i].Avatar.String = s.s3Client.BuildURL(s.folder, u.Avatar.String)
+		}
+	}
+	s.calculatePlacesByStat(users)
+	return &models.RatingByStat{
+		StatID: statID,
+		Total:  len(users),
+		Users:  users,
+	}, nil
+}
+
+func (s *service) calculatePlacesByStat(users []*models.UserRatingByStat) {
+	if len(users) == 0 {
+		return
+	}
+	users[0].Place = 1
+	prevVal := users[0].Value
+	prevPlace := users[0].Place
+	for i := 1; i < len(users); i++ {
+		if prevVal == users[i].Value {
+			users[i].Place = prevPlace
+		} else {
+			users[i].Place = i + 1
+			prevPlace = users[i].Place
+		}
+		prevVal = users[i].Value
+	}
 }
 
 func (s *service) GetFullUser(ctx context.Context, id int) (*models.FullUser, error) {
@@ -73,11 +153,24 @@ func (s *service) GetFullUser(ctx context.Context, id int) (*models.FullUser, er
 		u.Avatar.String = s.s3Client.BuildURL(s.folder, u.Avatar.String)
 	}
 
+	users, err := s.userRepo.GetUserRatingByAchs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	s.calculatePlacesByAchs(users)
+	place := -1
+	for _, ru := range users {
+		if ru.UserID == int(u.ID) {
+			place = ru.Place
+		}
+	}
+
 	return &models.FullUser{
 		User:         u,
 		Stats:        userStats,
 		Events:       userEvents,
 		Achievements: userAchList,
+		Place:        place,
 	}, nil
 }
 

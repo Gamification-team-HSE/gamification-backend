@@ -12,7 +12,9 @@ type Query {
     GetUsers(pagination: Pagination, filter: UserFilter): GetUsersResponse! @auth @goField(forceResolver: true)
     GetFullUser(id: Int!): FullUser! @auth @goField(forceResolver: true)
 
-    #rating - sort achiv count | value stat (мб две ручки)
+    #rating
+    GetRatingByAchs: RatingByAch! @auth @goField(forceResolver: true)
+    GetRatingByStat(id: Int!): RatingByStat @auth @goField(forceResolver: true)
 
     #achievements common
     GetAchievement(id: Int!): Achievement @auth @goField(forceResolver: true)

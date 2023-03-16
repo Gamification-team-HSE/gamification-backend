@@ -48,6 +48,7 @@ type FullUser struct {
 	Stats        []*UserStat  `json:"stats"`
 	Events       []*UserEvent `json:"events"`
 	Achievements []*UserAch   `json:"achievements"`
+	PlaceByAchs  int          `json:"place_by_achs"`
 }
 
 type GetAchievementsResponse struct {
@@ -127,6 +128,17 @@ type NewUser struct {
 type Pagination struct {
 	Page int `json:"page"`
 	Size int `json:"size"`
+}
+
+type RatingByAch struct {
+	Users []*UserRatingByAch `json:"users"`
+	Total int                `json:"total"`
+}
+
+type RatingByStat struct {
+	StatID int                 `json:"stat_id"`
+	Total  int                 `json:"total"`
+	Users  []*UserRatingByStat `json:"users"`
 }
 
 type RuleBlock struct {
@@ -220,6 +232,24 @@ type UserFilter struct {
 	Active *bool `json:"active"`
 	Banned *bool `json:"banned"`
 	Admins *bool `json:"admins"`
+}
+
+type UserRatingByAch struct {
+	UserID    int     `json:"user_id"`
+	Name      *string `json:"name"`
+	Email     string  `json:"email"`
+	Avatar    *string `json:"avatar"`
+	Place     int     `json:"place"`
+	TotalAchs int     `json:"total_achs"`
+}
+
+type UserRatingByStat struct {
+	UserID int     `json:"user_id"`
+	Name   *string `json:"name"`
+	Email  string  `json:"email"`
+	Avatar *string `json:"avatar"`
+	Place  int     `json:"place"`
+	Value  int     `json:"value"`
 }
 
 type UserStat struct {

@@ -54,6 +54,7 @@ type FullUser {
     stats: [UserStat]!
     events: [UserEvent]!
     achievements: [UserAch!]!
+    place_by_achs: Int!
 }
 
 type UserEvent {

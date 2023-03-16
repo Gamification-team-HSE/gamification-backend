@@ -112,6 +112,16 @@ func (r *queryResolver) GetFullUser(ctx context.Context, id int) (*models.FullUs
 	panic(fmt.Errorf("not implemented: GetFullUser - GetFullUser"))
 }
 
+// GetRatingByAchs is the resolver for the GetRatingByAchs field.
+func (r *queryResolver) GetRatingByAchs(ctx context.Context) (*models.RatingByAch, error) {
+	panic(fmt.Errorf("not implemented: GetRatingByAchs - GetRatingByAchs"))
+}
+
+// GetRatingByStat is the resolver for the GetRatingByStat field.
+func (r *queryResolver) GetRatingByStat(ctx context.Context, id int) (*models.RatingByStat, error) {
+	panic(fmt.Errorf("not implemented: GetRatingByStat - GetRatingByStat"))
+}
+
 // GetAchievement is the resolver for the GetAchievement field.
 func (r *queryResolver) GetAchievement(ctx context.Context, id int) (*models.Achievement, error) {
 	panic(fmt.Errorf("not implemented: GetAchievement - GetAchievement"))

@@ -237,6 +237,52 @@ func (r *Resolver) GetFullUser(ctx context.Context, id int) (*apiModels.FullUser
 		Stats:        resStats,
 		Events:       resEvents,
 		Achievements: resAch,
+		PlaceByAchs:  fullUser.Place,
 	}
 	return res, nil
+}
+
+func (r *Resolver) GetRatingByAchs(ctx context.Context) (*apiModels.RatingByAch, error) {
+	rating, err := r.userService.GetRatingByAchs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resUsers := make([]*apiModels.UserRatingByAch, 0, len(rating.Users))
+	for _, u := range rating.Users {
+		resUsers = append(resUsers, &apiModels.UserRatingByAch{
+			UserID:    u.UserID,
+			Name:      utils.SqlNullStringToString(u.Name),
+			Email:     u.Email,
+			Avatar:    utils.SqlNullStringToString(u.Avatar),
+			Place:     u.Place,
+			TotalAchs: u.TotalAchs,
+		})
+	}
+	return &apiModels.RatingByAch{
+		Total: rating.Total,
+		Users: resUsers,
+	}, nil
+}
+
+func (r *Resolver) GetRatingByStat(ctx context.Context, id int) (*apiModels.RatingByStat, error) {
+	rating, err := r.userService.GetRatingByStat(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	resUsers := make([]*apiModels.UserRatingByStat, 0, len(rating.Users))
+	for _, u := range rating.Users {
+		resUsers = append(resUsers, &apiModels.UserRatingByStat{
+			UserID: u.UserID,
+			Name:   utils.SqlNullStringToString(u.Name),
+			Email:  u.Email,
+			Avatar: utils.SqlNullStringToString(u.Avatar),
+			Place:  u.Place,
+			Value:  u.Value,
+		})
+	}
+	return &apiModels.RatingByStat{
+		StatID: rating.StatID,
+		Total:  rating.Total,
+		Users:  resUsers,
+	}, nil
 }

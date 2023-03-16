@@ -55,6 +55,7 @@ type FullUser struct {
 	Stats        []*UserStat
 	Events       []*UserEvent
 	Achievements []*UserAch
+	Place        int
 }
 
 type UserStat struct {
@@ -78,4 +79,33 @@ type UserAch struct {
 	Name        string         `db:"name"`
 	Description sql.NullString `db:"description"`
 	Image       sql.NullString `db:"image"`
+}
+
+type UserRatingByAch struct {
+	UserID    int            `db:"user_id"`
+	Name      sql.NullString `db:"name"`
+	Email     string         `db:"email"`
+	Place     int
+	TotalAchs int            `db:"total_ach"`
+	Avatar    sql.NullString `db:"avatar"`
+}
+
+type UserRatingByStat struct {
+	UserID int            `db:"user_id"`
+	Name   sql.NullString `db:"name"`
+	Email  string         `db:"email"`
+	Place  int
+	Value  int            `db:"value"`
+	Avatar sql.NullString `db:"avatar"`
+}
+
+type RatingByAchs struct {
+	Total int
+	Users []*UserRatingByAch
+}
+
+type RatingByStat struct {
+	StatID int
+	Total  int
+	Users  []*UserRatingByStat
 }

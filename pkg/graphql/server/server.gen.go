@@ -74,6 +74,7 @@ type ComplexityRoot struct {
 	FullUser struct {
 		Achievements func(childComplexity int) int
 		Events       func(childComplexity int) int
+		PlaceByAchs  func(childComplexity int) int
 		Stats        func(childComplexity int) int
 		User         func(childComplexity int) int
 	}
@@ -134,10 +135,23 @@ type ComplexityRoot struct {
 		GetEvent        func(childComplexity int, id int) int
 		GetEvents       func(childComplexity int, pagination *models.Pagination) int
 		GetFullUser     func(childComplexity int, id int) int
+		GetRatingByAchs func(childComplexity int) int
+		GetRatingByStat func(childComplexity int, id int) int
 		GetStat         func(childComplexity int, id int) int
 		GetStats        func(childComplexity int, pagination *models.Pagination) int
 		GetUser         func(childComplexity int, id int) int
 		GetUsers        func(childComplexity int, pagination *models.Pagination, filter *models.UserFilter) int
+	}
+
+	RatingByAch struct {
+		Total func(childComplexity int) int
+		Users func(childComplexity int) int
+	}
+
+	RatingByStat struct {
+		StatID func(childComplexity int) int
+		Total  func(childComplexity int) int
+		Users  func(childComplexity int) int
 	}
 
 	RuleBlock struct {
@@ -193,6 +207,24 @@ type ComplexityRoot struct {
 		Name        func(childComplexity int) int
 	}
 
+	UserRatingByAch struct {
+		Avatar    func(childComplexity int) int
+		Email     func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Place     func(childComplexity int) int
+		TotalAchs func(childComplexity int) int
+		UserID    func(childComplexity int) int
+	}
+
+	UserRatingByStat struct {
+		Avatar func(childComplexity int) int
+		Email  func(childComplexity int) int
+		Name   func(childComplexity int) int
+		Place  func(childComplexity int) int
+		UserID func(childComplexity int) int
+		Value  func(childComplexity int) int
+	}
+
 	UserStat struct {
 		Description func(childComplexity int) int
 		Name        func(childComplexity int) int
@@ -230,6 +262,8 @@ type QueryResolver interface {
 	GetCurrentUser(ctx context.Context) (*models.User, error)
 	GetUsers(ctx context.Context, pagination *models.Pagination, filter *models.UserFilter) (*models.GetUsersResponse, error)
 	GetFullUser(ctx context.Context, id int) (*models.FullUser, error)
+	GetRatingByAchs(ctx context.Context) (*models.RatingByAch, error)
+	GetRatingByStat(ctx context.Context, id int) (*models.RatingByStat, error)
 	GetAchievement(ctx context.Context, id int) (*models.Achievement, error)
 	GetAchievements(ctx context.Context, pagination *models.Pagination) (*models.GetAchievementsResponse, error)
 	GetEvent(ctx context.Context, id int) (*models.GetEvent, error)
@@ -378,6 +412,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.FullUser.Events(childComplexity), true
+
+	case "FullUser.place_by_achs":
+		if e.complexity.FullUser.PlaceByAchs == nil {
+			break
+		}
+
+		return e.complexity.FullUser.PlaceByAchs(childComplexity), true
 
 	case "FullUser.stats":
 		if e.complexity.FullUser.Stats == nil {
@@ -757,6 +798,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetFullUser(childComplexity, args["id"].(int)), true
 
+	case "Query.GetRatingByAchs":
+		if e.complexity.Query.GetRatingByAchs == nil {
+			break
+		}
+
+		return e.complexity.Query.GetRatingByAchs(childComplexity), true
+
+	case "Query.GetRatingByStat":
+		if e.complexity.Query.GetRatingByStat == nil {
+			break
+		}
+
+		args, err := ec.field_Query_GetRatingByStat_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetRatingByStat(childComplexity, args["id"].(int)), true
+
 	case "Query.GetStat":
 		if e.complexity.Query.GetStat == nil {
 			break
@@ -804,6 +864,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetUsers(childComplexity, args["pagination"].(*models.Pagination), args["filter"].(*models.UserFilter)), true
+
+	case "RatingByAch.total":
+		if e.complexity.RatingByAch.Total == nil {
+			break
+		}
+
+		return e.complexity.RatingByAch.Total(childComplexity), true
+
+	case "RatingByAch.users":
+		if e.complexity.RatingByAch.Users == nil {
+			break
+		}
+
+		return e.complexity.RatingByAch.Users(childComplexity), true
+
+	case "RatingByStat.stat_id":
+		if e.complexity.RatingByStat.StatID == nil {
+			break
+		}
+
+		return e.complexity.RatingByStat.StatID(childComplexity), true
+
+	case "RatingByStat.total":
+		if e.complexity.RatingByStat.Total == nil {
+			break
+		}
+
+		return e.complexity.RatingByStat.Total(childComplexity), true
+
+	case "RatingByStat.users":
+		if e.complexity.RatingByStat.Users == nil {
+			break
+		}
+
+		return e.complexity.RatingByStat.Users(childComplexity), true
 
 	case "RuleBlock.connection_operator":
 		if e.complexity.RuleBlock.ConnectionOperator == nil {
@@ -1029,6 +1124,90 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserEvent.Name(childComplexity), true
 
+	case "UserRatingByAch.avatar":
+		if e.complexity.UserRatingByAch.Avatar == nil {
+			break
+		}
+
+		return e.complexity.UserRatingByAch.Avatar(childComplexity), true
+
+	case "UserRatingByAch.email":
+		if e.complexity.UserRatingByAch.Email == nil {
+			break
+		}
+
+		return e.complexity.UserRatingByAch.Email(childComplexity), true
+
+	case "UserRatingByAch.name":
+		if e.complexity.UserRatingByAch.Name == nil {
+			break
+		}
+
+		return e.complexity.UserRatingByAch.Name(childComplexity), true
+
+	case "UserRatingByAch.place":
+		if e.complexity.UserRatingByAch.Place == nil {
+			break
+		}
+
+		return e.complexity.UserRatingByAch.Place(childComplexity), true
+
+	case "UserRatingByAch.total_achs":
+		if e.complexity.UserRatingByAch.TotalAchs == nil {
+			break
+		}
+
+		return e.complexity.UserRatingByAch.TotalAchs(childComplexity), true
+
+	case "UserRatingByAch.user_id":
+		if e.complexity.UserRatingByAch.UserID == nil {
+			break
+		}
+
+		return e.complexity.UserRatingByAch.UserID(childComplexity), true
+
+	case "UserRatingByStat.avatar":
+		if e.complexity.UserRatingByStat.Avatar == nil {
+			break
+		}
+
+		return e.complexity.UserRatingByStat.Avatar(childComplexity), true
+
+	case "UserRatingByStat.email":
+		if e.complexity.UserRatingByStat.Email == nil {
+			break
+		}
+
+		return e.complexity.UserRatingByStat.Email(childComplexity), true
+
+	case "UserRatingByStat.name":
+		if e.complexity.UserRatingByStat.Name == nil {
+			break
+		}
+
+		return e.complexity.UserRatingByStat.Name(childComplexity), true
+
+	case "UserRatingByStat.place":
+		if e.complexity.UserRatingByStat.Place == nil {
+			break
+		}
+
+		return e.complexity.UserRatingByStat.Place(childComplexity), true
+
+	case "UserRatingByStat.user_id":
+		if e.complexity.UserRatingByStat.UserID == nil {
+			break
+		}
+
+		return e.complexity.UserRatingByStat.UserID(childComplexity), true
+
+	case "UserRatingByStat.value":
+		if e.complexity.UserRatingByStat.Value == nil {
+			break
+		}
+
+		return e.complexity.UserRatingByStat.Value(childComplexity), true
+
 	case "UserStat.description":
 		if e.complexity.UserStat.Description == nil {
 			break
@@ -1246,6 +1425,35 @@ input InputStatRule {
     stat_id: Int!
     target_value: Int!
     comparison_type: Comparison!
+}
+
+type RatingByAch {
+    users: [UserRatingByAch!]!
+    total: Int!
+}
+
+type UserRatingByAch {
+    user_id: Int!
+    name: String
+    email: String!
+    avatar: String
+    place: Int!
+    total_achs: Int!
+}
+
+type RatingByStat {
+    stat_id: Int!
+    total: Int!
+    users: [UserRatingByStat!]!
+}
+
+type UserRatingByStat {
+    user_id: Int!
+    name: String
+    email: String!
+    avatar: String
+    place: Int!
+    value: Int!
 }`, BuiltIn: false},
 	{Name: "../schemas/event.graphqls", Input: `scalar Upload
 
@@ -1304,7 +1512,9 @@ type Query {
     GetUsers(pagination: Pagination, filter: UserFilter): GetUsersResponse! @auth @goField(forceResolver: true)
     GetFullUser(id: Int!): FullUser! @auth @goField(forceResolver: true)
 
-    #rating - sort achiv count | value stat (мб две ручки)
+    #rating
+    GetRatingByAchs: RatingByAch! @auth @goField(forceResolver: true)
+    GetRatingByStat(id: Int!): RatingByStat @auth @goField(forceResolver: true)
 
     #achievements common
     GetAchievement(id: Int!): Achievement @auth @goField(forceResolver: true)
@@ -1445,6 +1655,7 @@ type FullUser {
     stats: [UserStat]!
     events: [UserEvent]!
     achievements: [UserAch!]!
+    place_by_achs: Int!
 }
 
 type UserEvent {
@@ -1786,6 +1997,21 @@ func (ec *executionContext) field_Query_GetEvents_args(ctx context.Context, rawA
 }
 
 func (ec *executionContext) field_Query_GetFullUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_GetRatingByStat_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
@@ -2835,6 +3061,50 @@ func (ec *executionContext) fieldContext_FullUser_achievements(ctx context.Conte
 				return ec.fieldContext_UserAch_image(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserAch", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FullUser_place_by_achs(ctx context.Context, field graphql.CollectedField, obj *models.FullUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FullUser_place_by_achs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PlaceByAchs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FullUser_place_by_achs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FullUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5055,6 +5325,8 @@ func (ec *executionContext) fieldContext_Query_GetFullUser(ctx context.Context, 
 				return ec.fieldContext_FullUser_events(ctx, field)
 			case "achievements":
 				return ec.fieldContext_FullUser_achievements(ctx, field)
+			case "place_by_achs":
+				return ec.fieldContext_FullUser_place_by_achs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type FullUser", field.Name)
 		},
@@ -5067,6 +5339,156 @@ func (ec *executionContext) fieldContext_Query_GetFullUser(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_GetFullUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_GetRatingByAchs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_GetRatingByAchs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().GetRatingByAchs(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Auth == nil {
+				return nil, errors.New("directive auth is not implemented")
+			}
+			return ec.directives.Auth(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*models.RatingByAch); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *gitlab.com/krespix/gamification-api/pkg/graphql/models.RatingByAch`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.RatingByAch)
+	fc.Result = res
+	return ec.marshalNRatingByAch2ᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐRatingByAch(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_GetRatingByAchs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "users":
+				return ec.fieldContext_RatingByAch_users(ctx, field)
+			case "total":
+				return ec.fieldContext_RatingByAch_total(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RatingByAch", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_GetRatingByStat(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_GetRatingByStat(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().GetRatingByStat(rctx, fc.Args["id"].(int))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Auth == nil {
+				return nil, errors.New("directive auth is not implemented")
+			}
+			return ec.directives.Auth(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*models.RatingByStat); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *gitlab.com/krespix/gamification-api/pkg/graphql/models.RatingByStat`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*models.RatingByStat)
+	fc.Result = res
+	return ec.marshalORatingByStat2ᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐRatingByStat(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_GetRatingByStat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "stat_id":
+				return ec.fieldContext_RatingByStat_stat_id(ctx, field)
+			case "total":
+				return ec.fieldContext_RatingByStat_total(ctx, field)
+			case "users":
+				return ec.fieldContext_RatingByStat_users(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RatingByStat", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_GetRatingByStat_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -5707,6 +6129,254 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RatingByAch_users(ctx context.Context, field graphql.CollectedField, obj *models.RatingByAch) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RatingByAch_users(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Users, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*models.UserRatingByAch)
+	fc.Result = res
+	return ec.marshalNUserRatingByAch2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐUserRatingByAchᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RatingByAch_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RatingByAch",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user_id":
+				return ec.fieldContext_UserRatingByAch_user_id(ctx, field)
+			case "name":
+				return ec.fieldContext_UserRatingByAch_name(ctx, field)
+			case "email":
+				return ec.fieldContext_UserRatingByAch_email(ctx, field)
+			case "avatar":
+				return ec.fieldContext_UserRatingByAch_avatar(ctx, field)
+			case "place":
+				return ec.fieldContext_UserRatingByAch_place(ctx, field)
+			case "total_achs":
+				return ec.fieldContext_UserRatingByAch_total_achs(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserRatingByAch", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RatingByAch_total(ctx context.Context, field graphql.CollectedField, obj *models.RatingByAch) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RatingByAch_total(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Total, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RatingByAch_total(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RatingByAch",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RatingByStat_stat_id(ctx context.Context, field graphql.CollectedField, obj *models.RatingByStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RatingByStat_stat_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StatID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RatingByStat_stat_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RatingByStat",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RatingByStat_total(ctx context.Context, field graphql.CollectedField, obj *models.RatingByStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RatingByStat_total(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Total, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RatingByStat_total(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RatingByStat",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RatingByStat_users(ctx context.Context, field graphql.CollectedField, obj *models.RatingByStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RatingByStat_users(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Users, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*models.UserRatingByStat)
+	fc.Result = res
+	return ec.marshalNUserRatingByStat2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐUserRatingByStatᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RatingByStat_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RatingByStat",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user_id":
+				return ec.fieldContext_UserRatingByStat_user_id(ctx, field)
+			case "name":
+				return ec.fieldContext_UserRatingByStat_name(ctx, field)
+			case "email":
+				return ec.fieldContext_UserRatingByStat_email(ctx, field)
+			case "avatar":
+				return ec.fieldContext_UserRatingByStat_avatar(ctx, field)
+			case "place":
+				return ec.fieldContext_UserRatingByStat_place(ctx, field)
+			case "value":
+				return ec.fieldContext_UserRatingByStat_value(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserRatingByStat", field.Name)
 		},
 	}
 	return fc, nil
@@ -7093,6 +7763,522 @@ func (ec *executionContext) _UserEvent_created_at(ctx context.Context, field gra
 func (ec *executionContext) fieldContext_UserEvent_created_at(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserEvent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserRatingByAch_user_id(ctx context.Context, field graphql.CollectedField, obj *models.UserRatingByAch) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRatingByAch_user_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserRatingByAch_user_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserRatingByAch",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserRatingByAch_name(ctx context.Context, field graphql.CollectedField, obj *models.UserRatingByAch) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRatingByAch_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserRatingByAch_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserRatingByAch",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserRatingByAch_email(ctx context.Context, field graphql.CollectedField, obj *models.UserRatingByAch) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRatingByAch_email(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Email, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserRatingByAch_email(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserRatingByAch",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserRatingByAch_avatar(ctx context.Context, field graphql.CollectedField, obj *models.UserRatingByAch) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRatingByAch_avatar(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Avatar, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserRatingByAch_avatar(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserRatingByAch",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserRatingByAch_place(ctx context.Context, field graphql.CollectedField, obj *models.UserRatingByAch) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRatingByAch_place(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Place, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserRatingByAch_place(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserRatingByAch",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserRatingByAch_total_achs(ctx context.Context, field graphql.CollectedField, obj *models.UserRatingByAch) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRatingByAch_total_achs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalAchs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserRatingByAch_total_achs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserRatingByAch",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserRatingByStat_user_id(ctx context.Context, field graphql.CollectedField, obj *models.UserRatingByStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRatingByStat_user_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserRatingByStat_user_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserRatingByStat",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserRatingByStat_name(ctx context.Context, field graphql.CollectedField, obj *models.UserRatingByStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRatingByStat_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserRatingByStat_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserRatingByStat",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserRatingByStat_email(ctx context.Context, field graphql.CollectedField, obj *models.UserRatingByStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRatingByStat_email(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Email, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserRatingByStat_email(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserRatingByStat",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserRatingByStat_avatar(ctx context.Context, field graphql.CollectedField, obj *models.UserRatingByStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRatingByStat_avatar(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Avatar, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserRatingByStat_avatar(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserRatingByStat",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserRatingByStat_place(ctx context.Context, field graphql.CollectedField, obj *models.UserRatingByStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRatingByStat_place(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Place, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserRatingByStat_place(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserRatingByStat",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserRatingByStat_value(ctx context.Context, field graphql.CollectedField, obj *models.UserRatingByStat) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRatingByStat_value(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserRatingByStat_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserRatingByStat",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -10104,6 +11290,13 @@ func (ec *executionContext) _FullUser(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "place_by_achs":
+
+			out.Values[i] = ec._FullUser_place_by_achs(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10556,6 +11749,49 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
+		case "GetRatingByAchs":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_GetRatingByAchs(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "GetRatingByStat":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_GetRatingByStat(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
 		case "GetAchievement":
 			field := field
 
@@ -10700,6 +11936,83 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				return ec._Query___schema(ctx, field)
 			})
 
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var ratingByAchImplementors = []string{"RatingByAch"}
+
+func (ec *executionContext) _RatingByAch(ctx context.Context, sel ast.SelectionSet, obj *models.RatingByAch) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, ratingByAchImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RatingByAch")
+		case "users":
+
+			out.Values[i] = ec._RatingByAch_users(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "total":
+
+			out.Values[i] = ec._RatingByAch_total(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var ratingByStatImplementors = []string{"RatingByStat"}
+
+func (ec *executionContext) _RatingByStat(ctx context.Context, sel ast.SelectionSet, obj *models.RatingByStat) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, ratingByStatImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RatingByStat")
+		case "stat_id":
+
+			out.Values[i] = ec._RatingByStat_stat_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "total":
+
+			out.Values[i] = ec._RatingByStat_total(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "users":
+
+			out.Values[i] = ec._RatingByStat_users(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11028,6 +12341,120 @@ func (ec *executionContext) _UserEvent(ctx context.Context, sel ast.SelectionSet
 		case "created_at":
 
 			out.Values[i] = ec._UserEvent_created_at(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var userRatingByAchImplementors = []string{"UserRatingByAch"}
+
+func (ec *executionContext) _UserRatingByAch(ctx context.Context, sel ast.SelectionSet, obj *models.UserRatingByAch) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userRatingByAchImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UserRatingByAch")
+		case "user_id":
+
+			out.Values[i] = ec._UserRatingByAch_user_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+
+			out.Values[i] = ec._UserRatingByAch_name(ctx, field, obj)
+
+		case "email":
+
+			out.Values[i] = ec._UserRatingByAch_email(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "avatar":
+
+			out.Values[i] = ec._UserRatingByAch_avatar(ctx, field, obj)
+
+		case "place":
+
+			out.Values[i] = ec._UserRatingByAch_place(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "total_achs":
+
+			out.Values[i] = ec._UserRatingByAch_total_achs(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var userRatingByStatImplementors = []string{"UserRatingByStat"}
+
+func (ec *executionContext) _UserRatingByStat(ctx context.Context, sel ast.SelectionSet, obj *models.UserRatingByStat) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userRatingByStatImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UserRatingByStat")
+		case "user_id":
+
+			out.Values[i] = ec._UserRatingByStat_user_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+
+			out.Values[i] = ec._UserRatingByStat_name(ctx, field, obj)
+
+		case "email":
+
+			out.Values[i] = ec._UserRatingByStat_email(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "avatar":
+
+			out.Values[i] = ec._UserRatingByStat_avatar(ctx, field, obj)
+
+		case "place":
+
+			out.Values[i] = ec._UserRatingByStat_place(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "value":
+
+			out.Values[i] = ec._UserRatingByStat_value(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -11724,6 +13151,20 @@ func (ec *executionContext) unmarshalNNewUser2gitlabᚗcomᚋkrespixᚋgamificat
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNRatingByAch2gitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐRatingByAch(ctx context.Context, sel ast.SelectionSet, v models.RatingByAch) graphql.Marshaler {
+	return ec._RatingByAch(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRatingByAch2ᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐRatingByAch(ctx context.Context, sel ast.SelectionSet, v *models.RatingByAch) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._RatingByAch(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNRole2gitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐRole(ctx context.Context, v interface{}) (models.Role, error) {
 	var res models.Role
 	err := res.UnmarshalGQL(v)
@@ -12044,6 +13485,114 @@ func (ec *executionContext) marshalNUserEvent2ᚕᚖgitlabᚗcomᚋkrespixᚋgam
 	wg.Wait()
 
 	return ret
+}
+
+func (ec *executionContext) marshalNUserRatingByAch2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐUserRatingByAchᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.UserRatingByAch) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUserRatingByAch2ᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐUserRatingByAch(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNUserRatingByAch2ᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐUserRatingByAch(ctx context.Context, sel ast.SelectionSet, v *models.UserRatingByAch) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UserRatingByAch(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNUserRatingByStat2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐUserRatingByStatᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.UserRatingByStat) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUserRatingByStat2ᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐUserRatingByStat(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNUserRatingByStat2ᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐUserRatingByStat(ctx context.Context, sel ast.SelectionSet, v *models.UserRatingByStat) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UserRatingByStat(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNUserStat2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐUserStat(ctx context.Context, sel ast.SelectionSet, v []*models.UserStat) graphql.Marshaler {
@@ -12536,6 +14085,13 @@ func (ec *executionContext) unmarshalOPagination2ᚖgitlabᚗcomᚋkrespixᚋgam
 	}
 	res, err := ec.unmarshalInputPagination(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalORatingByStat2ᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐRatingByStat(ctx context.Context, sel ast.SelectionSet, v *models.RatingByStat) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._RatingByStat(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOStatRule2ᚕᚖgitlabᚗcomᚋkrespixᚋgamificationᚑapiᚋpkgᚋgraphqlᚋmodelsᚐStatRuleᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.StatRule) graphql.Marshaler {
