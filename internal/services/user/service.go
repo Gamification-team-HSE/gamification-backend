@@ -48,7 +48,7 @@ func (s *service) GetFullUser(ctx context.Context, id int) (*models.FullUser, er
 	}
 	for i, v := range userAchList {
 		if v.Image.Valid {
-			userAchList[i].Image.String = s.s3Client.BuildURL(s.folder, v.Image.String)
+			userAchList[i].Image.String = s.s3Client.BuildURL("achievements", v.Image.String)
 		}
 	}
 	userStats, err := s.statRepo.GetUserStats(ctx, id)
@@ -62,7 +62,7 @@ func (s *service) GetFullUser(ctx context.Context, id int) (*models.FullUser, er
 	}
 	for i, ue := range userEvents {
 		if ue.Image.Valid {
-			userEvents[i].Image.String = s.s3Client.BuildURL(s.folder, ue.Image.String)
+			userEvents[i].Image.String = s.s3Client.BuildURL("events", ue.Image.String)
 		}
 	}
 	u, err := s.userRepo.Get(ctx, int64(id))
