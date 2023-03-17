@@ -109,7 +109,7 @@ func (s *service) calculateSingleAchievement(ctx context.Context, userID int, ac
 	for _, v := range blocksRes {
 		sum += v
 	}
-	fmt.Println(blocksRes)
+
 	if sum > 0 {
 		return true, nil
 	}
@@ -151,8 +151,6 @@ func (s *service) calculateBlock(ctx context.Context, block *models.RulesBlock, 
 	for _, v := range resBlock {
 		res *= v
 	}
-
-	fmt.Println(resBlock)
 
 	return res, nil
 }

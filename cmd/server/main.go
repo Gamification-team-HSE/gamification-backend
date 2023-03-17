@@ -92,7 +92,7 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	authSrc := authService.New(smtpClient, userRepo, authRepo, validate, cfg.Auth.JWTSecret, time.Hour*24)
 	statSrc := statService.New(statRepo, validate, achRepo)
 	imageSrc := imageService.New(cfg.ImageService)
-	eventSrc := eventService.New(eventRepo, validate, s3Client, cfg.Buckets.Events)
+	eventSrc := eventService.New(eventRepo, validate, s3Client, cfg.Buckets.Events, achRepo)
 	achievementSrc := achievementsService.New(achRepo, s3Client, cfg.Buckets.Achievements)
 
 	resolver := resolvers.New(userSrc, authSrc, statSrc, imageSrc, eventSrc, achievementSrc)

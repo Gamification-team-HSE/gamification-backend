@@ -62,6 +62,41 @@ func (s *service) Create(ctx context.Context, stat *models.Stat) error {
 }
 
 func (s *service) Delete(ctx context.Context, id int) error {
+	achList, err := s.achRepo.List(ctx, nil)
+	if err != nil {
+		return err
+	}
+	toUpdate := make([]*models.RepoAchievement, 0)
+
+	needUpd := false
+	for i, a := range achList {
+		updRules := achList[i].Rules
+		for j, b := range a.Rules.Blocks {
+			res := make([]*models.StatRule, 0)
+			for i, statRule := range b.StatRules {
+				if statRule.StatID != id {
+					res = append(res, b.StatRules[i])
+				} else {
+					needUpd = true
+				}
+			}
+			updRules.Blocks[j].StatRules = res
+		}
+		if needUpd {
+			toUpdate = append(toUpdate, &models.RepoAchievement{
+				ID:    a.ID,
+				Rules: updRules,
+			})
+		}
+	}
+
+	for _, a := range toUpdate {
+		err = s.achRepo.Update(ctx, a)
+		if err != nil {
+			return err
+		}
+	}
+
 	return s.statRepo.Delete(ctx, id)
 }
 

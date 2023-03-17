@@ -8,6 +8,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"gitlab.com/krespix/gamification-api/internal/clients/s3"
 	"gitlab.com/krespix/gamification-api/internal/models"
+	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/achievement"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/event"
 	"gitlab.com/krespix/gamification-api/internal/services/image"
 	apiModels "gitlab.com/krespix/gamification-api/pkg/graphql/models"
@@ -25,13 +26,48 @@ type Service interface {
 type service struct {
 	validate  *validator.Validate
 	eventRepo event.Repository
+	achRepo   achievement.Repository
 
 	folder   string
 	s3Client s3.Client
 }
 
 func (s *service) Delete(ctx context.Context, id int) error {
-	err := s.eventRepo.Delete(ctx, id)
+	achList, err := s.achRepo.List(ctx, nil)
+	if err != nil {
+		return err
+	}
+	toUpdate := make([]*models.RepoAchievement, 0)
+
+	needUpd := false
+	for i, a := range achList {
+		updRules := achList[i].Rules
+		for j, b := range a.Rules.Blocks {
+			res := make([]*models.EventRule, 0)
+			for i, statRule := range b.EventRules {
+				if statRule.EventID != id {
+					res = append(res, b.EventRules[i])
+				} else {
+					needUpd = true
+				}
+			}
+			updRules.Blocks[j].EventRules = res
+		}
+		if needUpd {
+			toUpdate = append(toUpdate, &models.RepoAchievement{
+				ID:    a.ID,
+				Rules: updRules,
+			})
+		}
+	}
+
+	for _, a := range toUpdate {
+		err = s.achRepo.Update(ctx, a)
+		if err != nil {
+			return err
+		}
+	}
+	err = s.eventRepo.Delete(ctx, id)
 	return err
 }
 
@@ -196,11 +232,13 @@ func New(
 	validate *validator.Validate,
 	s3Client s3.Client,
 	folder string,
+	achRepo achievement.Repository,
 ) Service {
 	return &service{
 		eventRepo: eventRepo,
 		validate:  validate,
 		folder:    folder,
 		s3Client:  s3Client,
+		achRepo:   achRepo,
 	}
 }
