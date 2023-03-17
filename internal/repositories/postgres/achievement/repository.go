@@ -26,10 +26,29 @@ type Repository interface {
 	List(ctx context.Context, achievement *models.RepoPagination) ([]*models.RepoAchievement, error)
 	Delete(ctx context.Context, id int) error
 	GetUsersAchievements(ctx context.Context, userID int) ([]*models.UserAch, error)
+	CreateUserAch(ctx context.Context, userID, achID int) error
 }
 
 type repository struct {
 	*postgres.Client
+}
+
+func (r *repository) CreateUserAch(ctx context.Context, userID, achID int) error {
+	qb := utils.PgQB().
+		Insert(userAchievementsTableName).
+		Columns("user_id,"+
+			"achievement_id,"+
+			"created_at").
+		Values(userID, achID, time.Now()).
+		Suffix("on conflict do nothing")
+
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.GetDBx().ExecContext(ctx, query, args...)
+	return err
 }
 
 func (r *repository) GetUsersAchievements(ctx context.Context, userID int) ([]*models.UserAch, error) {

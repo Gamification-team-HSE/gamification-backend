@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"gitlab.com/krespix/gamification-api/internal/models"
+	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/achievement"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres/stat"
 )
 
@@ -19,6 +20,7 @@ type Service interface {
 type service struct {
 	validate *validator.Validate
 	statRepo stat.Repository
+	achRepo  achievement.Repository
 }
 
 func (s *service) Update(ctx context.Context, updateStat *models.UpdateStat) error {
@@ -70,9 +72,11 @@ func (s *service) Get(ctx context.Context, id int) (*models.Stat, error) {
 func New(
 	statRepo stat.Repository,
 	validate *validator.Validate,
+	achRepo achievement.Repository,
 ) Service {
 	return &service{
 		statRepo: statRepo,
 		validate: validate,
+		achRepo:  achRepo,
 	}
 }

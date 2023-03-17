@@ -15,6 +15,7 @@ import (
 	"gitlab.com/krespix/gamification-api/internal/api/http/middlewares"
 	"gitlab.com/krespix/gamification-api/internal/core/metrics"
 	"gitlab.com/krespix/gamification-api/internal/services/auth"
+	"gitlab.com/krespix/gamification-api/internal/services/user"
 	"gitlab.com/krespix/gamification-api/pkg/graphql/server"
 )
 
@@ -26,10 +27,19 @@ type Server struct {
 	allowedMethods string
 	allowedHeaders string
 	fakeHeaders    string
+	userService    user.Service
 }
 
 // New will instantiate a new instance of Server.
-func New(resolver server.ResolverRoot, authSvc auth.Service, fakeAuth bool, allowedMethods, allowedHeaders, fakeHeaders string) *Server {
+func New(
+	resolver server.ResolverRoot,
+	authSvc auth.Service,
+	fakeAuth bool,
+	allowedMethods,
+	allowedHeaders,
+	fakeHeaders string,
+	userService user.Service,
+) *Server {
 	return &Server{
 		resolver:       resolver,
 		authService:    authSvc,
@@ -37,6 +47,7 @@ func New(resolver server.ResolverRoot, authSvc auth.Service, fakeAuth bool, allo
 		allowedHeaders: allowedHeaders,
 		allowedMethods: allowedMethods,
 		fakeHeaders:    fakeHeaders,
+		userService:    userService,
 	}
 }
 
@@ -75,6 +86,12 @@ func (s *Server) AddRoutes(baseRouter *mux.Router) error {
 	graphqlRouter := baseRouter.PathPrefix("/gapi/v1").Subrouter()
 	apiSubRouter := baseRouter.PathPrefix("/api").Subrouter()
 	v1SubRouter := apiSubRouter.PathPrefix("/v1").Subrouter()
+
+	postUserEventHandler := http.HandlerFunc(s.postUserEvent)
+	v1SubRouter.Handle("/users/events", postUserEventHandler).Methods(http.MethodPost)
+
+	postUserStatHandler := http.HandlerFunc(s.postUserStat)
+	v1SubRouter.Handle("/users/stats", postUserStatHandler).Methods(http.MethodPost)
 
 	graphqlRouter.Use(authmw.AuthMiddleware)
 

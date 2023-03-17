@@ -30,6 +30,8 @@ type Service interface {
 	GetFullUser(ctx context.Context, id int) (*models.FullUser, error)
 	GetRatingByStat(ctx context.Context, statID int) (*models.RatingByStat, error)
 	GetRatingByAchs(ctx context.Context) (*models.RatingByAchs, error)
+	AddEvent(ctx context.Context, email string, eventID int) error
+	AddStat(ctx context.Context, email string, statID int) error
 }
 
 type service struct {
@@ -157,6 +159,9 @@ func (s *service) GetFullUser(ctx context.Context, id int) (*models.FullUser, er
 	if err != nil {
 		return nil, err
 	}
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].TotalAchs > users[j].TotalAchs
+	})
 	s.calculatePlacesByAchs(users)
 	place := -1
 	for _, ru := range users {

@@ -96,7 +96,16 @@ func appStart(ctx context.Context, a *app.App) ([]app.Listener, error) {
 	achievementSrc := achievementsService.New(achRepo, s3Client, cfg.Buckets.Achievements)
 
 	resolver := resolvers.New(userSrc, authSrc, statSrc, imageSrc, eventSrc, achievementSrc)
-	httpServer := httpAPI.New(resolver, authSrc, cfg.Auth.FakeAuthEnabled, cfg.HTTP.AllowedMethods, cfg.HTTP.AllowedHeaders, cfg.Auth.FakeAuthHeaders)
+
+	httpServer := httpAPI.New(
+		resolver,
+		authSrc,
+		cfg.Auth.FakeAuthEnabled,
+		cfg.HTTP.AllowedMethods,
+		cfg.HTTP.AllowedHeaders,
+		cfg.Auth.FakeAuthHeaders,
+		userSrc,
+	)
 
 	//init super admin
 	err = userSrc.InitSuperAdmin(ctx, cfg.SuperAdmin)

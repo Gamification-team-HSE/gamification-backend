@@ -17,6 +17,7 @@ const (
 	usersTableName            = "users"
 	userStatTableName         = "users_stats"
 	userAchievementsTableName = "user_achievements"
+	userEventsTableName       = "user_events"
 )
 
 type Repository interface {
@@ -42,10 +43,56 @@ type Repository interface {
 	Recover(ctx context.Context, id int) error
 	GetUserRatingByStat(ctx context.Context, statID int) ([]*models.UserRatingByStat, error)
 	GetUserRatingByAchs(ctx context.Context) ([]*models.UserRatingByAch, error)
+	CreateUserEvent(ctx context.Context, userID, eventID int) error
+	CreateUserStat(ctx context.Context, userID, statID int) error
 }
 
 type repository struct {
 	*postgres.Client
+}
+
+func (r *repository) CreateUserEvent(ctx context.Context, userID, eventID int) error {
+	qb := utils.PgQB().
+		Insert(userEventsTableName).
+		Columns("user_id,"+
+			"event_id,"+
+			"created_at").
+		Values(userID, eventID, time.Now()).
+		Suffix("on conflict do nothing")
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.GetDBx().ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *repository) CreateUserStat(ctx context.Context, userID, statID int) error {
+	qb := utils.PgQB().
+		Insert(userStatTableName).
+		Columns("user_id,"+
+			"stat_id,"+
+			"created_at,"+
+			"updated_at,"+
+			"value").
+		Values(userID, statID, time.Now(), time.Now(), 1).
+		Suffix("on conflict on constraint users_stats_pkey do update set " +
+			"value = users_stats.value + 1," +
+			"updated_at = now()")
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.GetDBx().ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *repository) GetUserRatingByAchs(ctx context.Context) ([]*models.UserRatingByAch, error) {
