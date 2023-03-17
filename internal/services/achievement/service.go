@@ -74,7 +74,7 @@ func (s *service) Update(ctx context.Context, updateAchievement *models.UpdateAc
 	repoAch := &models.RepoAchievement{
 		ID: updateAchievement.ID,
 	}
-	if old.Image.Valid {
+	if old.Image.Valid && updateAchievement.Image != nil {
 		err = s.s3Client.Delete(s.folder, old.Image.String)
 		if err != nil {
 			return err
