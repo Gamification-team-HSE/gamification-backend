@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"fmt"
 
 	"gitlab.com/krespix/gamification-api/internal/models"
 )
@@ -20,10 +19,6 @@ func (s *service) AddEvent(ctx context.Context, email string, eventID int) error
 	achToRecalculate, err := s.getAchievementsToRecalculate(ctx, int(user.ID), 0, eventID)
 	if err != nil {
 		return err
-	}
-	fmt.Println(len(achToRecalculate))
-	for _, v := range achToRecalculate {
-		fmt.Println(v.ID)
 	}
 
 	err = s.calculateAchievements(ctx, int(user.ID), achToRecalculate)
@@ -47,10 +42,6 @@ func (s *service) AddStat(ctx context.Context, email string, statID int) error {
 	achToRecalculate, err := s.getAchievementsToRecalculate(ctx, int(user.ID), statID, 0)
 	if err != nil {
 		return err
-	}
-	fmt.Println(len(achToRecalculate))
-	for _, v := range achToRecalculate {
-		fmt.Println(v.ID)
 	}
 
 	err = s.calculateAchievements(ctx, int(user.ID), achToRecalculate)
