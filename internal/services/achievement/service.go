@@ -74,10 +74,12 @@ func (s *service) Update(ctx context.Context, updateAchievement *models.UpdateAc
 	repoAch := &models.RepoAchievement{
 		ID: updateAchievement.ID,
 	}
-	if old.Image.Valid && updateAchievement.Image != nil {
-		err = s.s3Client.Delete(s.folder, old.Image.String)
-		if err != nil {
-			return err
+	if updateAchievement.Image != nil {
+		if old.Image.Valid {
+			err = s.s3Client.Delete(s.folder, old.Image.String)
+			if err != nil {
+				return err
+			}
 		}
 		updateAchievement.Image.Filename = image.GenerateFilename(updateAchievement.Image)
 		err = s.s3Client.Put(s.folder, updateAchievement.Image.Filename, updateAchievement.Image.ContentType, updateAchievement.Image.File)
