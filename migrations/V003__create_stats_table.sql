@@ -10,8 +10,3 @@ create table stats (
     seq_period text
 );
 -- +goose StatementEnd
-
--- +goose Down
--- +goose StatementBegin
-drop table stats;
--- +goose StatementEnd

@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // imports the postgres driver
+
 	"gitlab.com/krespix/gamification-api/internal/core/errors"
 )
 
@@ -43,7 +45,7 @@ func New(cfg Config) (*Client, error) {
 func (c *Client) Connect(_ context.Context) error {
 	db, err := sqlx.Connect("postgres", c.createDSN())
 	if err != nil {
-		return ErrConnect.Wrap(err)
+		return fmt.Errorf("dsn: %s, err: %w", c.createDSN(), ErrConnect.Wrap(err))
 	}
 	c.db = db
 	return nil

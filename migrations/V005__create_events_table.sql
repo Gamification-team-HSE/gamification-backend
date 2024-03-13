@@ -10,8 +10,3 @@ create table event(
     end_at      timestamp
 );
 -- +goose StatementEnd
-
--- +goose Down
--- +goose StatementBegin
-drop table event;
--- +goose StatementEnd

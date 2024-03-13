@@ -4,10 +4,10 @@ http:
   allowed_headers: "Content-Type, Authorization"
 
 db:
-  host: "localhost"
+  host: "vartose.fvds.ru"
   port: "5432"
-  user: "postgres"
-  db_name: "postgres"
+  user: "gamification_api"
+  db_name: "gamification_api"
   ssl_mode: "disable"
 
 sentry:
