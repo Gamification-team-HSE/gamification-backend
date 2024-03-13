@@ -1,0 +1,52 @@
+version: '3.7'
+
+services:
+  postgres:
+    platform: linux/amd64
+    image: postgres:12-alpine
+    expose:
+      - 5432
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - gamification-api
+    env_file:
+      - build/env/postgres.env
+
+  flyway:
+    platform: linux/amd64
+    image: repo.int.tsum.com/tsum/core/flyway:latest
+    command: -url=jdbc:postgresql://postgres:5432/postgres -user=postgres -password=postgres -connectRetries=60 migrate
+    volumes:
+      - "./migrations:/flyway/sql"
+    networks:
+      - gamification-api
+    depends_on:
+      - postgres
+
+  gamication-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - gamification-api
+    depends_on:
+      - postgres
+      - flyway
+    env_file:
+      - .env
+    volumes:
+      - ./gamification-api:/opt/app
+
+
+volumes:
+  pg-data:
+    name: service-gamification-api-pg-data
+
+networks:
+  gamification-api:
+    name: gamification-api_network

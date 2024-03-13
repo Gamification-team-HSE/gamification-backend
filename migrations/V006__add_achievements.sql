@@ -27,10 +27,3 @@ create table user_achievements
     primary key (user_id, achievement_id)
 );
 -- +goose StatementEnd
-
--- +goose Down
--- +goose StatementBegin
-drop table user_achievements;
-drop table user_events;
-drop table achievements;
--- +goose StatementEnd

@@ -3,11 +3,13 @@ package user
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/lib/pq"
+
 	"gitlab.com/krespix/gamification-api/internal/models"
 	"gitlab.com/krespix/gamification-api/internal/repositories/postgres"
 	"gitlab.com/krespix/gamification-api/pkg/utils"
@@ -282,7 +284,7 @@ func (r *repository) ExistsByEmail(ctx context.Context, email string) (bool, err
 	var id int64
 	err = r.GetDBx().GetContext(ctx, &id, query, args...)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return false, nil
 		}
 		return false, err

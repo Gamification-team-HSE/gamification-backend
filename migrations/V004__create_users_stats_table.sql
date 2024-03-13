@@ -9,8 +9,3 @@ create table users_stats (
     PRIMARY KEY (user_id, stat_id)
 );
 -- +goose StatementEnd
-
--- +goose Down
--- +goose StatementBegin
-drop table users_stats;
--- +goose StatementEnd
